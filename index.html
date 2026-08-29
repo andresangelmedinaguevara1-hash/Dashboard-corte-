@@ -329,14 +329,15 @@
           <thead class="bg-slate-950 uppercase text-slate-300 font-bold border-b border-slate-800 text-[11px] tracking-wider">
             <tr>
               <th class="py-3.5 px-3 text-left">ENTIDAD</th>
-              <th class="py-3.5 px-3 text-left">PRENDA PROCESADA</th>
+              <th class="py-3.5 px-3 text-left">PROCESADA</th>
               <th class="py-3.5 px-3 text-center">GÉNERO</th>
-              <th class="py-3.5 px-3 text-center">META REQUERIDA ✏️</th>
-              <th class="py-3.5 px-3 text-center">CANT. CORTADA ✏️</th>
-              <th class="py-3.5 px-3 text-center">CANT. ENTREGADA ✏️</th>
-              <th class="py-3.5 px-3 text-center">FALTA CORTAR (Meta - Cortado)</th>
-              <th class="py-3.5 px-3 text-center">PEND. ENTREGA (Cortado - Entregado)</th>
-              <th class="py-3.5 px-3 text-center">% AVANCE (Entregado / Meta)</th>
+              <th class="py-3.5 px-3 text-center">REQUERIDA ✏️</th>
+              <th class="py-3.5 px-3 text-center">CORTADA ✏️</th>
+              <th class="py-3.5 px-3 text-center">ENTREGADA ✏️</th>
+              <th class="py-3.5 px-3 text-center">(META - CORTADO)</th>
+              <th class="py-3.5 px-3 text-center">(CORTADO - ENTREGADO)</th>
+              <th class="py-3.5 px-3 text-center">CORTE %</th>
+              <th class="py-3.5 px-3 text-center">ENTREGA %</th>
             </tr>
           </thead>
           <tbody id="tabla-metas-body" class="divide-y divide-slate-800/60 font-medium">
@@ -345,12 +346,13 @@
           <tfoot class="bg-slate-950 font-black text-white text-xs border-t border-slate-800">
             <tr>
               <td colspan="3" class="py-3.5 px-3 text-right uppercase tracking-wider text-slate-400">TOTALES CONSOLIDADOS:</td>
-              <td id="foot-meta-total" class="py-3.5 px-3 text-center text-indigo-400 font-bold">3,534 pcs</td>
-              <td id="foot-cortado-total" class="py-3.5 px-3 text-center text-emerald-400 font-bold">3,217 pcs</td>
-              <td id="foot-entregado-total" class="py-3.5 px-3 text-center text-blue-400 font-bold">3,115 pcs</td>
-              <td id="foot-falta-cortar-total" class="py-3.5 px-3 text-center text-amber-400 font-bold">317 pcs</td>
-              <td id="foot-falta-entrega-total" class="py-3.5 px-3 text-center text-orange-400 font-bold">102 pcs</td>
-              <td id="foot-avance-entrega-total" class="py-3.5 px-3 text-center text-blue-300 font-bold">88.1%</td>
+              <td id="foot-meta-total" class="py-3.5 px-3 text-center text-indigo-400 font-bold">7,126 pcs</td>
+              <td id="foot-cortado-total" class="py-3.5 px-3 text-center text-emerald-400 font-bold">1,323 pcs</td>
+              <td id="foot-entregado-total" class="py-3.5 px-3 text-center text-blue-400 font-bold">3,745 pcs</td>
+              <td id="foot-falta-cortar-total" class="py-3.5 px-3 text-center text-amber-400 font-bold">5,877 pcs</td>
+              <td id="foot-falta-entrega-total" class="py-3.5 px-3 text-center text-orange-400 font-bold">0 pcs</td>
+              <td id="foot-avance-corte-total" class="py-3.5 px-3 text-center text-amber-300 font-bold">18.6%</td>
+              <td id="foot-avance-entrega-total" class="py-3.5 px-3 text-center text-blue-300 font-bold">52.6%</td>
             </tr>
           </tfoot>
         </table>
@@ -367,61 +369,40 @@
 
   <script>
     // --- DATOS SEMANA 1 (1,711 Pcs) ---
-    const datosSemana1 = [
-      { dia: "Lunes", fecha: "17/08/2026", cortador: "Oswaldo Ramos", cliente: "SEDAPAL / AYACUCHO", prenda: "Casaca Broche / Camisa", genero: "Mixto", cantidad: 456 },
-      { dia: "Martes", fecha: "18/08/2026", cortador: "Oswaldo Ramos", cliente: "SEDAPAL", prenda: "Casaca Cierre", genero: "Dama", cantidad: 200 },
-      { dia: "Miércoles", fecha: "19/08/2026", cortador: "Oswaldo Ramos", cliente: "ÁNCASH / SEDAPAL", prenda: "Falda / Pantalón", genero: "Dama", cantidad: 261 },
-      { dia: "Jueves", fecha: "20/08/2026", cortador: "Oswaldo Ramos", cliente: "MOQUEGUA / SEDAPAL", prenda: "Chaleco, Saco / Blusa", genero: "Dama", cantidad: 357 },
-      { dia: "Viernes", fecha: "21/08/2026", cortador: "Oswaldo Ramos", cliente: "SEDAPAL / PRODUCE", prenda: "Casaca, Blusa / Camisa", genero: "Mixto", cantidad: 437 }
-    ];
-
-    // --- DATOS SEMANA 2 (1,506 Pcs) ---
-    const datosSemana2 = [
-      { fechaLabel: "22/08/2026", cortador: "Marino / Equipo", modalidad: "DESTAJO", cliente: "SEDAPAL", genero: "Dama", prenda: "Blusa Dama", cantidad: 381, estado: "Completado" },
-      { fechaLabel: "24/08/2026", cortador: "Marino / Equipo", modalidad: "DESTAJO", cliente: "SEDAPAL / PRODUCE / INEN / UNTEL", genero: "Mixto", prenda: "Pantalón, Camisa, Falda", cantidad: 281, estado: "Completado" },
-      { fechaLabel: "25/08/2026", cortador: "Marino / Equipo", modalidad: "DESTAJO", cliente: "BIBLIOTECA", genero: "Caballero", prenda: "Camisa Caballero", cantidad: 50, estado: "Completado" },
-      { fechaLabel: "26/08/2026", cortador: "Marino / Equipo", modalidad: "DESTAJO", cliente: "BIBLIOTECA / INEN", genero: "Mixto", prenda: "Camisa, Pantalón, Blusa", cantidad: 128, estado: "Completado" },
-      { fechaLabel: "27/08/2026", cortador: "Marino / Equipo", modalidad: "DESTAJO", cliente: "SEDAPAL / BIBLIOTECA", genero: "Mixto", prenda: "Pantalón, Casaca Cierre, Camisa", cantidad: 404, estado: "Completado" },
-      { fechaLabel: "28/08/2026", cortador: "Marino / Equipo", modalidad: "DESTAJO", cliente: "AYACUCHO", genero: "Caballero", prenda: "Camisa Manga Larga Caballero", cantidad: 162, estado: "Completado" },
-      { fechaLabel: "28/08/2026", cortador: "Jorge Pinchi", modalidad: "PLANILLA", cliente: "AYACUCHO", genero: "Caballero", prenda: "Sacos Caballero", cantidad: 100, estado: "Completado" }
-    ];
-
-    // --- METAS DETALLADAS DESGLOSADAS CON CANTIDAD ENTREGADA EDITABLE ---
+    // --- METAS DETALLADAS DESGLOSADAS ---
     let metasDetalladas = [
       // SEDAPAL
-      { entidad: "SEDAPAL", prenda: "Blusa", genero: "Dama", cortado: 918, meta: 918, entregado: 918 },
-      { entidad: "SEDAPAL", prenda: "Pantalón", genero: "Dama", cortado: 680, meta: 700, entregado: 650 },
-      { entidad: "SEDAPAL", prenda: "Casaca Cierre", genero: "Dama", cortado: 350, meta: 350, entregado: 350 },
-      { entidad: "SEDAPAL", prenda: "Casaca Broche", genero: "Dama", cortado: 295, meta: 295, entregado: 295 },
+      { entidad: "SEDAPAL", prenda: "Blusa", genero: "Dama", meta: 1378, cortado: 381, entregado: 738 },
+      { entidad: "SEDAPAL", prenda: "Pantalón", genero: "Dama", meta: 1378, cortado: 250, entregado: 680 },
+      { entidad: "SEDAPAL", prenda: "Casaca Cierre", genero: "Dama", meta: 689, cortado: 150, entregado: 350 },
+      { entidad: "SEDAPAL", prenda: "Casaca Broche", genero: "Dama", meta: 689, cortado: 0, entregado: 430 },
       
-      // AYACUCHO
-      { entidad: "AYACUCHO", prenda: "Camisa", genero: "Caballero", cortado: 266, meta: 266, entregado: 266 },
-      { entidad: "AYACUCHO", prenda: "Camisa Manga Larga", genero: "Caballero", cortado: 162, meta: 180, entregado: 160 },
-      { entidad: "AYACUCHO", prenda: "Sacos", genero: "Caballero", cortado: 100, meta: 120, entregado: 90 },
+      // AYACUCHO (AYACUCHO - Camisa eliminado)
+      { entidad: "AYACUCHO", prenda: "Camisa Manga Larga", genero: "Caballero", meta: 442, cortado: 162, entregado: 428 },
+      { entidad: "AYACUCHO", prenda: "Sacos", genero: "Caballero", meta: 221, cortado: 100, entregado: 100 },
       
-      // PRODUCE
-      { entidad: "PRODUCE", prenda: "Camisa", genero: "Dama", cortado: 62, meta: 65, entregado: 62 },
-      { entidad: "PRODUCE", prenda: "Camisa", genero: "Caballero", cortado: 60, meta: 70, entregado: 60 },
+      // PRODUCE (PRODUCE - Camisa Dama eliminado)
+      { entidad: "PRODUCE", prenda: "Camisa", genero: "Caballero", meta: 372, cortado: 62, entregado: 372 },
       
       // BIBLIOTECA
-      { entidad: "BIBLIOTECA", prenda: "Camisa", genero: "Caballero", cortado: 110, meta: 110, entregado: 110 },
+      { entidad: "BIBLIOTECA", prenda: "Camisa", genero: "Caballero", meta: 110, cortado: 4, entregado: 110 },
       
       // INEN
-      { entidad: "INEN", prenda: "Pantalón", genero: "Dama", cortado: 48, meta: 80, entregado: 48 },
-      { entidad: "INEN", prenda: "Pantalón", genero: "Caballero", cortado: 38, meta: 60, entregado: 38 },
-      { entidad: "INEN", prenda: "Blusa", genero: "Dama", cortado: 24, meta: 50, entregado: 24 },
-      { entidad: "INEN", prenda: "Camisa", genero: "Caballero", cortado: 2, meta: 10, entregado: 2 },
+      { entidad: "INEN", prenda: "Pantalón", genero: "Dama", meta: 0, cortado: 48, entregado: 48 },
+      { entidad: "INEN", prenda: "Pantalón", genero: "Caballero", meta: 1422, cortado: 38, entregado: 38 },
+      { entidad: "INEN", prenda: "Blusa", genero: "Dama", meta: 0, cortado: 24, entregado: 24 },
+      { entidad: "INEN", prenda: "Camisa", genero: "Caballero", meta: 0, cortado: 2, entregado: 2 },
       
       // MOQUEGUA
-      { entidad: "MOQUEGUA", prenda: "Chaleco", genero: "Dama", cortado: 77, meta: 77, entregado: 77 },
-      { entidad: "MOQUEGUA", prenda: "Saco", genero: "Dama", cortado: 9, meta: 9, entregado: 9 },
-      { entidad: "MOQUEGUA", prenda: "Pantalón", genero: "Dama", cortado: 4, meta: 4, entregado: 4 },
+      { entidad: "MOQUEGUA", prenda: "Chaleco", genero: "Dama", meta: 77, cortado: 77, entregado: 77 },
+      { entidad: "MOQUEGUA", prenda: "Saco", genero: "Dama", meta: 89, cortado: 9, entregado: 89 },
+      { entidad: "MOQUEGUA", prenda: "Pantalón", genero: "Dama", meta: 89, cortado: 4, entregado: 89 },
       
       // ÁNCASH
-      { entidad: "ÁNCASH", prenda: "Falda", genero: "Dama", cortado: 11, meta: 169, entregado: 11 },
+      { entidad: "ÁNCASH", prenda: "Falda", genero: "Dama", meta: 169, cortado: 11, entregado: 169 },
       
       // UNTEL
-      { entidad: "UNTEL", prenda: "Falda", genero: "Dama", cortado: 1, meta: 1, entregado: 1 }
+      { entidad: "UNTEL", prenda: "Falda", genero: "Dama", meta: 1, cortado: 1, entregado: 1 }
     ];
 
     let chartCompSem, chartClientCons;
@@ -467,16 +448,11 @@
       metasDetalladas.forEach((item, index) => {
         if (filtro !== "TODAS" && item.entidad !== filtro) return;
 
-        // Fórmulas:
-        // 1. Falta Cortar = Meta Requerida - Cantidad Cortada
         const faltaCortar = Math.max(0, item.meta - item.cortado);
-        
-        // 2. Pendiente por Entregar = Cantidad Cortada - Cantidad Entregada
         const faltaEntrega = Math.max(0, item.cortado - item.entregado);
 
-        // 3. ÚNICO PORCENTAJE: Porcentaje de Avance = (Cantidad Entregada / Meta Requerida) * 100
-        const pctAvanceEntrega = item.meta > 0 ? ((item.entregado / item.meta) * 100) : 0;
-        const pctAvanceEntregaFormatted = Math.min(pctAvanceEntrega, 100).toFixed(1);
+        const pctCorte = item.meta > 0 ? ((item.cortado / item.meta) * 100) : 0;
+        const pctEntrega = item.meta > 0 ? ((item.entregado / item.meta) * 100) : 0;
 
         sumMeta += item.meta;
         sumCortado += item.cortado;
@@ -509,14 +485,8 @@
           </td>
           <td class="py-3 px-3 text-center font-bold ${faltaCortar === 0 ? 'text-slate-500' : 'text-amber-400'}">${faltaCortar.toLocaleString()} pcs</td>
           <td class="py-3 px-3 text-center font-bold ${faltaEntrega === 0 ? 'text-slate-500' : 'text-orange-400'}">${faltaEntrega.toLocaleString()} pcs</td>
-          <td class="py-3 px-3 text-center">
-            <div class="flex items-center justify-center gap-1.5">
-              <span class="font-bold text-xs ${pctAvanceEntrega >= 100 ? 'text-blue-400' : 'text-orange-300'}">${pctAvanceEntregaFormatted}%</span>
-              <div class="w-10 bg-slate-800 h-1.5 rounded-full overflow-hidden hidden sm:block">
-                <div class="h-full ${pctAvanceEntrega >= 100 ? 'bg-blue-400' : 'bg-orange-400'}" style="width: ${Math.min(pctAvanceEntrega, 100)}%"></div>
-              </div>
-            </div>
-          </td>
+          <td class="py-3 px-3 text-center font-bold text-amber-300">${pctCorte.toFixed(1)}%</td>
+          <td class="py-3 px-3 text-center font-bold text-blue-300">${pctEntrega.toFixed(1)}%</td>
         `;
         tbody.appendChild(tr);
       });
@@ -527,6 +497,7 @@
       const footEntregado = document.getElementById('foot-entregado-total');
       const footFaltaCortar = document.getElementById('foot-falta-cortar-total');
       const footFaltaEntrega = document.getElementById('foot-falta-entrega-total');
+      const footAvanceCorte = document.getElementById('foot-avance-corte-total');
       const footAvanceEntrega = document.getElementById('foot-avance-entrega-total');
 
       if (footMeta) footMeta.innerText = `${sumMeta.toLocaleString()} pcs`;
@@ -535,8 +506,10 @@
       if (footFaltaCortar) footFaltaCortar.innerText = `${sumFaltaCortar.toLocaleString()} pcs`;
       if (footFaltaEntrega) footFaltaEntrega.innerText = `${sumFaltaEntrega.toLocaleString()} pcs`;
       
+      const pctCorteFooter = sumMeta > 0 ? ((sumCortado / sumMeta) * 100).toFixed(1) : "0.0";
       const pctEntregaFooter = sumMeta > 0 ? ((sumEntregado / sumMeta) * 100).toFixed(1) : "0.0";
 
+      if (footAvanceCorte) footAvanceCorte.innerText = `${pctCorteFooter}%`;
       if (footAvanceEntrega) footAvanceEntrega.innerText = `${pctEntregaFooter}%`;
 
       // Resumen Global Superior
