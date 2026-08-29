@@ -1,914 +1,758 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Semanal de Corte y Control de Metas</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
-        .view-btn.active {
-            background-color: #2563eb;
-            color: #ffffff;
-            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
-        }
-        .day-card {
-            transition: all 0.2s ease-in-out;
-            cursor: pointer;
-        }
-        .day-card:hover {
-            transform: translateY(-2px);
-        }
-        .day-card.active {
-            border-color: #2563eb;
-            background-color: #eff6ff;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
-        }
-        .progress-bar {
-            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Reglas especiales para impresión limpia en papel / PDF */
-        @media print {
-            .no-print, header, .view-btn, button {
-                display: none !important;
-            }
-            body {
-                background-color: #ffffff !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            main {
-                max-width: 100% !important;
-                width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            .shadow-sm, .shadow-md, .shadow-2xl {
-                box-shadow: none !important;
-            }
-            .border {
-                border-color: #cbd5e1 !important;
-            }
-            canvas {
-                max-height: 220px !important;
-            }
-            .print-header {
-                display: block !important;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard de Control de Corte y Producción - Consolidado Semanal</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen pb-12">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
-    <!-- Header Visible en Pantalla -->
-    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50 no-print">
-        <div class="max-w-7xl mx-auto px-4 py-3.5 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-3">
-            <div class="flex items-center space-x-3">
-                <div class="p-2.5 bg-blue-600 rounded-xl text-white shadow-sm">
-                    <i class="fa-solid fa-scissors text-2xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-black tracking-wide">Control de Corte y Producción</h1>
-                    <p class="text-xs text-slate-400">Semana 1: 17 al 21 de Agosto de 2026 | Supervisor: Oswaldo Ramos</p>
-                </div>
-            </div>
-
-            <!-- Botones Switcher de Vista y PDF -->
-            <div class="flex items-center bg-slate-800 p-1.5 rounded-xl border border-slate-700 space-x-1">
-                <button onclick="switchView('semanal')" id="btn-semanal" class="view-btn active text-xs font-bold px-3.5 py-2 rounded-lg transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-table-cells"></i> Vista Semanal
-                </button>
-                <button onclick="switchView('metas')" id="btn-metas" class="view-btn text-xs font-bold text-slate-300 hover:text-white px-3.5 py-2 rounded-lg transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-bullseye"></i> Metas por Prenda
-                </button>
-                <button onclick="switchView('diaria')" id="btn-diaria" class="view-btn text-xs font-bold text-slate-300 hover:text-white px-3.5 py-2 rounded-lg transition flex items-center gap-1.5">
-                    <i class="fa-regular fa-calendar-days"></i> Vista por Días
-                </button>
-                <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-print"></i> Imprimir / PDF
-                </button>
-            </div>
+  <!-- Header / Navbar -->
+  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap justify-between items-center gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="p-2.5 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-500/20">
+          <i data-lucide="scissors" class="w-6 h-6"></i>
         </div>
-    </header>
-
-    <!-- Encabezado exclusivo para la versión impresa en PDF -->
-    <div class="hidden print-header p-4 border-b-2 border-slate-900 mb-4 bg-white">
-        <div class="flex justify-between items-center">
-            <div>
-                <h1 class="text-xl font-black text-slate-900 uppercase">REPORTE DE CONTROL DE CORTE - SEMANA 1</h1>
-                <p class="text-xs text-slate-600 font-bold">FECHA: 17 AL 21 DE AGOSTO DE 2026 | SUPERVISOR: OSWALDO RAMOS</p>
-            </div>
-            <div class="text-right">
-                <span class="text-xs font-bold text-slate-800">TALLER DE CORTE GENERAL</span>
-            </div>
+        <div>
+          <h1 class="text-xl font-extrabold text-white tracking-tight">Control de Corte y Producción</h1>
+          <p class="text-xs text-slate-400">Taller de Corte General | Consolidado Semana 1 + Semana 2</p>
         </div>
+      </div>
+
+      <!-- Selector de Vista y Pestañas -->
+      <nav class="flex bg-slate-950 p-1.5 rounded-xl border border-slate-800 text-xs sm:text-sm font-medium">
+        <button id="tab-consolidado" onclick="switchTab('consolidado')" class="px-3.5 py-2 rounded-lg transition-all flex items-center gap-2 bg-blue-600 text-white font-bold shadow">
+          <i data-lucide="layers" class="w-4 h-4"></i> Consolidado Quincenal
+        </button>
+        <button id="tab-sem2" onclick="switchTab('sem2')" class="px-3.5 py-2 rounded-lg text-slate-400 hover:text-slate-200 transition-all flex items-center gap-2">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Semana 2 (1,506 pcs)
+        </button>
+        <button id="tab-sem1" onclick="switchTab('sem1')" class="px-3.5 py-2 rounded-lg text-slate-400 hover:text-slate-200 transition-all flex items-center gap-2">
+          <i data-lucide="history" class="w-4 h-4"></i> Semana 1 (1,711 pcs)
+        </button>
+        <button id="tab-metas" onclick="switchTab('metas')" class="px-3.5 py-2 rounded-lg text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 transition-all flex items-center gap-2 border border-amber-500/30">
+          <i data-lucide="target" class="w-4 h-4"></i> Metas por Entidad
+        </button>
+      </nav>
     </div>
+  </header>
 
-    <!-- Contenedor Principal -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-        <!-- Tarjetas Resumen Superior (KPIs) -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Total Cortado Semana 1</span>
-                <div class="flex justify-between items-baseline mt-1">
-                    <h2 class="text-2xl font-black text-slate-900">1,711 <span class="text-xs font-bold text-slate-500">Pcs</span></h2>
-                    <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-check"></i> Auditado</span>
-                </div>
-            </div>
+    <!-- SECCIÓN 1: CONSOLIDADO GENERAL (SEMANA 1 + SEMANA 2) -->
+    <section id="sec-consolidado" class="space-y-6">
 
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Promedio Diario (5 Días)</span>
-                <div class="flex justify-between items-baseline mt-1">
-                    <h2 class="text-2xl font-black text-indigo-700">342.2 <span class="text-xs font-bold text-slate-500">Pcs/día</span></h2>
-                    <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">Lun-Vie</span>
-                </div>
-            </div>
+      <!-- Banner de resumen global -->
+      <div class="bg-gradient-to-r from-blue-900/40 via-slate-900 to-indigo-900/40 p-5 rounded-2xl border border-blue-500/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 mb-2 border border-blue-500/30">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Datos Fusionados: 17/08/2026 al 28/08/2026
+          </div>
+          <h2 class="text-xl font-black text-white">Resumen Consolidado Quincenal de Corte</h2>
+          <p class="text-xs text-slate-300">Integración de la Primera Semana (1,711 pcs) y Segunda Semana (1,506 pcs).</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="window.print()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-xl border border-slate-700 flex items-center gap-2 text-slate-200 transition">
+            <i data-lucide="printer" class="w-4 h-4"></i> Imprimir / Exportar PDF
+          </button>
+        </div>
+      </div>
 
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Cliente Mayoritario</span>
-                <div class="flex justify-between items-baseline mt-1">
-                    <h2 class="text-xl font-black text-blue-700">SEDAPAL</h2>
-                    <span class="text-xs font-bold text-slate-700">1,282 pcs</span>
-                </div>
-            </div>
-
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Lotes Completados (100%)</span>
-                <div class="flex justify-between items-baseline mt-1">
-                    <h2 class="text-xl font-black text-emerald-600">4 Lotes</h2>
-                    <span class="text-[11px] font-bold text-slate-600">Áncash / Moquegua</span>
-                </div>
-            </div>
+      <!-- Tarjetas de Métricas Globales -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 hover:border-blue-500/40 transition">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Consolidado Cortado</p>
+          <h3 class="text-3xl font-black text-white mt-1">3,217 <span class="text-xs font-normal text-slate-400">pcs</span></h3>
+          <p class="text-xs text-emerald-400 mt-2 flex items-center gap-1 font-medium">
+            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> 100% Auditado
+          </p>
         </div>
 
-
-        <!-- ========================================== -->
-        <!-- VISTA 1: VISTA SEMANAL MATRIZ CONSOLIDADA -->
-        <!-- ========================================== -->
-        <div id="view-semanal" class="space-y-6">
-
-            <!-- Tabla Matriz Semanal Consolidada -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="bg-slate-900 text-white px-5 py-3.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                    <div>
-                        <h2 class="text-base font-black tracking-wide flex items-center gap-2">
-                            <i class="fa-solid fa-table text-blue-400"></i> MATRIZ DE CORTE SEMANAL POR DÍA Y CORTADOR
-                        </h2>
-                        <p class="text-xs text-slate-400">Consolidado general acumulado de la Semana 1 (17/08/2026 - 21/08/2026)</p>
-                    </div>
-                    <span class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-lg">1,711 Piezas Cortadas</span>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-left text-slate-700">
-                        <thead class="bg-slate-100 text-slate-800 font-bold uppercase text-[10px] border-b border-slate-200">
-                            <tr>
-                                <th class="px-4 py-3">Día</th>
-                                <th class="px-4 py-3">Fecha</th>
-                                <th class="px-4 py-3">Personal / Cortadores</th>
-                                <th class="px-4 py-3">Entidad / Cliente</th>
-                                <th class="px-4 py-3">Prenda Procesada</th>
-                                <th class="px-4 py-3 text-center">Género</th>
-                                <th class="px-4 py-3 text-right">Cant. Cortada</th>
-                                <th class="px-4 py-3 text-right font-black bg-blue-50/50">Subtotal Día</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200 font-medium">
-                            
-                            <!-- LUNES -->
-                            <tr class="bg-slate-50/30">
-                                <td class="px-4 py-2.5 font-bold text-slate-900" rowspan="2">Lunes</td>
-                                <td class="px-4 py-2.5 text-slate-500" rowspan="2">17/08/2026</td>
-                                <td class="px-4 py-2.5">Elvis Mallma / Pedro Gorrio</td>
-                                <td class="px-4 py-2.5 font-bold text-blue-700">SEDAPAL</td>
-                                <td class="px-4 py-2.5">Casaca de Broche</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">Dama</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-800">190 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-black text-blue-700 bg-blue-50/50 text-sm" rowspan="2">456 pcs</td>
-                            </tr>
-                            <tr class="bg-slate-50/30 border-b-2 border-slate-200">
-                                <td class="px-4 py-2.5">Doris Andrade / Roberto Serquén</td>
-                                <td class="px-4 py-2.5 font-bold text-indigo-700">AYACUCHO</td>
-                                <td class="px-4 py-2.5">Camisa</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">Caballero</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-800">266 pcs</td>
-                            </tr>
-
-                            <!-- MARTES -->
-                            <tr class="border-b-2 border-slate-200">
-                                <td class="px-4 py-2.5 font-bold text-slate-900">Martes</td>
-                                <td class="px-4 py-2.5 text-slate-500">18/08/2026</td>
-                                <td class="px-4 py-2.5">Elvis Mallma / Pedro Gorrio</td>
-                                <td class="px-4 py-2.5 font-bold text-blue-700">SEDAPAL</td>
-                                <td class="px-4 py-2.5">Casaca con Cierre</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">Dama</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-800">200 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-black text-blue-700 bg-blue-50/50 text-sm">200 pcs</td>
-                            </tr>
-
-                            <!-- MIÉRCOLES -->
-                            <tr class="bg-slate-50/30">
-                                <td class="px-4 py-2.5 font-bold text-slate-900" rowspan="2">Miércoles</td>
-                                <td class="px-4 py-2.5 text-slate-500" rowspan="2">19/08/2026</td>
-                                <td class="px-4 py-2.5">Elvis Mallma / Pedro Gorrio</td>
-                                <td class="px-4 py-2.5 font-bold text-pink-700">ÁNCASH</td>
-                                <td class="px-4 py-2.5">Falda</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">Dama</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-800">11 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-black text-blue-700 bg-blue-50/50 text-sm" rowspan="2">261 pcs</td>
-                            </tr>
-                            <tr class="bg-slate-50/30 border-b-2 border-slate-200">
-                                <td class="px-4 py-2.5">Elvis Mallma / Pedro Gorrio</td>
-                                <td class="px-4 py-2.5 font-bold text-blue-700">SEDAPAL</td>
-                                <td class="px-4 py-2.5">Pantalón</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">Dama</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-800">250 pcs</td>
-                            </tr>
-
-                            <!-- JUEVES -->
-                            <tr>
-                                <td class="px-4 py-2.5 font-bold text-slate-900" rowspan="3">Jueves</td>
-                                <td class="px-4 py-2.5 text-slate-500" rowspan="3">20/08/2026</td>
-                                <td class="px-4 py-2.5">Elvis Mallma / Pedro Gorrio</td>
-                                <td class="px-4 py-2.5 font-bold text-amber-700">MOQUEGUA</td>
-                                <td class="px-4 py-2.5">Chaleco (77) / Saco (9)</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">Dama</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-800">86 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-black text-blue-700 bg-blue-50/50 text-sm" rowspan="3">357 pcs</td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-2.5">Doris Andrade / Roberto Serquén</td>
-                                <td class="px-4 py-2.5 font-bold text-blue-700">SEDAPAL</td>
-                                <td class="px-4 py-2.5">Blusa Dama</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">Dama</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-800">267 pcs</td>
-                            </tr>
-                            <tr class="border-b-2 border-slate-200">
-                                <td class="px-4 py-2.5">Doris Andrade / Roberto Serquén</td>
-                                <td class="px-4 py-2.5 font-bold text-amber-700">MOQUEGUA</td>
-                                <td class="px-4 py-2.5">Pantalón Dama</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">Dama</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-800">4 pcs</td>
-                            </tr>
-
-                            <!-- VIERNES -->
-                            <tr class="bg-slate-50/30">
-                                <td class="px-4 py-2.5 font-bold text-slate-900" rowspan="3">Viernes</td>
-                                <td class="px-4 py-2.5 text-slate-500" rowspan="3">21/08/2026</td>
-                                <td class="px-4 py-2.5">Elvis Mallma / Pedro Gorrio</td>
-                                <td class="px-4 py-2.5 font-bold text-blue-700">SEDAPAL</td>
-                                <td class="px-4 py-2.5">Casaca Broche</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">Dama</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-800">105 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-black text-emerald-600 bg-emerald-50/50 text-sm" rowspan="3">437 pcs</td>
-                            </tr>
-                            <tr class="bg-slate-50/30">
-                                <td class="px-4 py-2.5">Doris Andrade / Roberto Serquén</td>
-                                <td class="px-4 py-2.5 font-bold text-blue-700">SEDAPAL</td>
-                                <td class="px-4 py-2.5">Blusa Dama</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">Dama</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-800">270 pcs</td>
-                            </tr>
-                            <tr class="bg-slate-50/30 border-b-2 border-slate-900">
-                                <td class="px-4 py-2.5">Doris Andrade / Roberto Serquén</td>
-                                <td class="px-4 py-2.5 font-bold text-emerald-700">PRODUCE</td>
-                                <td class="px-4 py-2.5">Camisa</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">Dama</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-800">62 pcs</td>
-                            </tr>
-
-                        </tbody>
-                        <tfoot class="bg-slate-900 text-white font-black text-xs">
-                            <tr>
-                                <td colspan="6" class="px-4 py-3 uppercase tracking-wider">TOTAL GENERAL CORTADO EN LA SEMANA 1 (456 + 200 + 261 + 357 + 437):</td>
-                                <td class="px-4 py-3 text-right text-amber-400 text-sm">1,711 Pcs</td>
-                                <td class="px-4 py-3 text-right text-blue-400 text-sm">1,711 Pcs</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Gráficos Semanales -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Bar Chart Lunes a Viernes -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-column text-blue-600"></i> Producción por Día de la Semana
-                    </h3>
-                    <div class="h-60">
-                        <canvas id="weeklyBarChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Donut Chart Entidades -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-pie text-indigo-600"></i> Reparto Total por Entidad / Cliente
-                    </h3>
-                    <div class="h-60">
-                        <canvas id="weeklyClientChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
+        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 hover:border-indigo-500/40 transition">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Aporte Semana 1</p>
+          <h3 class="text-3xl font-black text-indigo-400 mt-1">1,711 <span class="text-xs font-normal text-slate-400">pcs</span></h3>
+          <p class="text-xs text-slate-400 mt-2">53.2% del volumen total</p>
         </div>
 
-
-        <!-- ========================================== -->
-        <!-- VISTA 2: MÓDULO DE CONTROL DE METAS POR PRENDA (ACTUALIZADO) -->
-        <!-- ========================================== -->
-        <div id="view-metas" class="hidden space-y-6">
-
-            <!-- Encabezado Módulo de Metas -->
-            <div class="bg-slate-900 text-white p-5 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <span class="bg-indigo-600 text-white text-[10px] font-black px-2.5 py-1 rounded uppercase tracking-wider">Control de Lotes Requeridos</span>
-                    <h2 class="text-xl font-black mt-1 flex items-center gap-2">
-                        <i class="fa-solid fa-bullseye text-amber-400"></i> Control de Metas y Faltantes por Prenda
-                    </h2>
-                    <p class="text-xs text-slate-300">Monitoreo con entregas previas y saldos restantes por cliente.</p>
-                </div>
-                <div class="bg-slate-800 border border-slate-700 px-4 py-2.5 rounded-xl text-right">
-                    <span class="text-[10px] text-slate-400 font-bold uppercase block">Lotes al 100% Completados</span>
-                    <span class="text-sm font-black text-emerald-400">ÁNCASH (Falda), MOQUEGUA (Saco, Chaleco y Pantalón)</span>
-                </div>
-            </div>
-
-            <!-- Tabla Resumen de Metas Requeridas vs Real por Prenda -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="px-5 py-3.5 bg-slate-100 border-b border-slate-200 flex justify-between items-center">
-                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                        <i class="fa-solid fa-list-check text-blue-600 mr-1.5"></i> Avance por Entidad, Prenda y Género (Cifras Reales)
-                    </h3>
-                    <span class="text-[11px] text-slate-500 font-semibold">Consolidado Actualizado</span>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-left text-slate-700">
-                        <thead class="bg-slate-50 text-slate-800 font-bold uppercase text-[10px] border-b border-slate-200">
-                            <tr>
-                                <th class="px-4 py-3">Entidad / Cliente</th>
-                                <th class="px-4 py-3">Prenda Procesada</th>
-                                <th class="px-4 py-3 text-center">Género</th>
-                                <th class="px-4 py-3 text-right">Meta Requerida</th>
-                                <th class="px-4 py-3 text-right font-bold text-blue-700">Cant. Entregada / Cortada</th>
-                                <th class="px-4 py-3 text-right font-bold text-amber-700">Cantidad Faltante</th>
-                                <th class="px-4 py-3 w-48 text-center">% Avance Real</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200 font-medium">
-                            
-                            <!-- MOQUEGUA - Chaleco (ACTUALIZADO A 100%) -->
-                            <tr class="hover:bg-slate-50 bg-emerald-50/30">
-                                <td class="px-4 py-2.5 font-bold text-amber-700">MOQUEGUA</td>
-                                <td class="px-4 py-2.5 font-semibold text-slate-800">CHALECO</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">DAMA</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-900">77 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-emerald-700">77 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-emerald-600">0 pcs</td>
-                                <td class="px-4 py-2.5">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                                            <div class="bg-emerald-500 h-2.5 rounded-full progress-bar" style="width: 100%"></div>
-                                        </div>
-                                        <span class="text-[10px] font-bold text-emerald-700 w-12 text-right">100%</span>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <!-- ÁNCASH - Falda (100%) -->
-                            <tr class="hover:bg-slate-50 bg-emerald-50/30">
-                                <td class="px-4 py-2.5 font-bold text-pink-700">ÁNCASH</td>
-                                <td class="px-4 py-2.5 font-semibold text-slate-800">FALDA</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">DAMA</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-900">169 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-emerald-700">169 pcs (11 Sem. 1)</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-emerald-600">0 pcs</td>
-                                <td class="px-4 py-2.5">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                                            <div class="bg-emerald-500 h-2.5 rounded-full progress-bar" style="width: 100%"></div>
-                                        </div>
-                                        <span class="text-[10px] font-bold text-emerald-700 w-12 text-right">100%</span>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <!-- MOQUEGUA - Saco (100%) -->
-                            <tr class="hover:bg-slate-50 bg-emerald-50/30">
-                                <td class="px-4 py-2.5 font-bold text-amber-700">MOQUEGUA</td>
-                                <td class="px-4 py-2.5 font-semibold text-slate-800">SACO</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">DAMA</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-900">89 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-emerald-700">89 pcs (9 Sem. 1)</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-emerald-600">0 pcs</td>
-                                <td class="px-4 py-2.5">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                                            <div class="bg-emerald-500 h-2.5 rounded-full progress-bar" style="width: 100%"></div>
-                                        </div>
-                                        <span class="text-[10px] font-bold text-emerald-700 w-12 text-right">100%</span>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <!-- MOQUEGUA - Pantalón Dama (100%) -->
-                            <tr class="hover:bg-slate-50 bg-emerald-50/30">
-                                <td class="px-4 py-2.5 font-bold text-amber-700">MOQUEGUA</td>
-                                <td class="px-4 py-2.5 font-semibold text-slate-800">PANTALÓN</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">DAMA</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-900">89 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-emerald-700">89 pcs (4 Sem. 1)</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-emerald-600">0 pcs</td>
-                                <td class="px-4 py-2.5">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                                            <div class="bg-emerald-500 h-2.5 rounded-full progress-bar" style="width: 100%"></div>
-                                        </div>
-                                        <span class="text-[10px] font-bold text-emerald-700 w-12 text-right">100%</span>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <!-- PRODUCE - Camisa (84.4%) -->
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-2.5 font-bold text-emerald-700">PRODUCE</td>
-                                <td class="px-4 py-2.5 font-semibold text-slate-800">CAMISA</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">DAMA</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-900">73.5 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-blue-700">62 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-amber-600">11.5 pcs</td>
-                                <td class="px-4 py-2.5">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                                            <div class="bg-blue-600 h-2.5 rounded-full progress-bar" style="width: 84.4%"></div>
-                                        </div>
-                                        <span class="text-[10px] font-bold text-blue-700 w-12 text-right">84.4%</span>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <!-- SEDAPAL - Casaca Broche (ACTUALIZADO A 62.4%) -->
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-2.5 font-bold text-blue-700">SEDAPAL</td>
-                                <td class="px-4 py-2.5 font-semibold text-slate-800">CASACA BROCHE</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">DAMA</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-900">689 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-blue-700">430 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-amber-600">259 pcs</td>
-                                <td class="px-4 py-2.5">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                                            <div class="bg-blue-600 h-2.5 rounded-full progress-bar" style="width: 62.4%"></div>
-                                        </div>
-                                        <span class="text-[10px] font-bold text-slate-700 w-12 text-right">62.4%</span>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <!-- AYACUCHO - Camisa (60.2%) -->
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-2.5 font-bold text-indigo-700">AYACUCHO</td>
-                                <td class="px-4 py-2.5 font-semibold text-slate-800">CAMISA</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">CABALLERO</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-900">442 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-blue-700">266 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-amber-600">176 pcs</td>
-                                <td class="px-4 py-2.5">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                                            <div class="bg-blue-600 h-2.5 rounded-full progress-bar" style="width: 60.18%"></div>
-                                        </div>
-                                        <span class="text-[10px] font-bold text-slate-700 w-12 text-right">60.2%</span>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <!-- SEDAPAL - Casaca Cierre -->
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-2.5 font-bold text-blue-700">SEDAPAL</td>
-                                <td class="px-4 py-2.5 font-semibold text-slate-800">CASACA CON CIERRE</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">DAMA</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-900">689 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-blue-700">200 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-amber-600">489 pcs</td>
-                                <td class="px-4 py-2.5">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                                            <div class="bg-blue-600 h-2.5 rounded-full progress-bar" style="width: 29.02%"></div>
-                                        </div>
-                                        <span class="text-[10px] font-bold text-slate-700 w-12 text-right">29.0%</span>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <!-- SEDAPAL - Blusa (ACTUALIZADO META 2067, CORTADO 537, AVANCE 26.0%) -->
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-2.5 font-bold text-blue-700">SEDAPAL</td>
-                                <td class="px-4 py-2.5 font-semibold text-slate-800">BLUSA</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">DAMA</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-900">2,067 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-blue-700">537 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-amber-600">1,530 pcs</td>
-                                <td class="px-4 py-2.5">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                                            <div class="bg-blue-600 h-2.5 rounded-full progress-bar" style="width: 25.98%"></div>
-                                        </div>
-                                        <span class="text-[10px] font-bold text-slate-700 w-12 text-right">26.0%</span>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <!-- SEDAPAL - Pantalón Dama (ACTUALIZADO META 1378, CORTADO 250, AVANCE 18.1%) -->
-                            <tr class="hover:bg-slate-50">
-                                <td class="px-4 py-2.5 font-bold text-blue-700">SEDAPAL</td>
-                                <td class="px-4 py-2.5 font-semibold text-slate-800">PANTALÓN</td>
-                                <td class="px-4 py-2.5 text-center text-slate-500">DAMA</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-slate-900">1,378 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-blue-700">250 pcs</td>
-                                <td class="px-4 py-2.5 text-right font-bold text-amber-600">1,128 pcs</td>
-                                <td class="px-4 py-2.5">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                                            <div class="bg-blue-600 h-2.5 rounded-full progress-bar" style="width: 18.14%"></div>
-                                        </div>
-                                        <span class="text-[10px] font-bold text-slate-700 w-12 text-right">18.1%</span>
-                                    </div>
-                                </td>
-                            </tr>
-
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Gráfico Comparativo Metas vs Real -->
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-bar text-blue-600"></i> Comparativa Gráfica por Prenda: Meta Requerida vs. Cortado Real
-                </h3>
-                <div class="h-64">
-                    <canvas id="goalsComparisonChart"></canvas>
-                </div>
-            </div>
-
+        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 hover:border-emerald-500/40 transition">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Aporte Semana 2</p>
+          <h3 class="text-3xl font-black text-emerald-400 mt-1">1,506 <span class="text-xs font-normal text-slate-400">pcs</span></h3>
+          <p class="text-xs text-slate-400 mt-2">46.8% del volumen total</p>
         </div>
 
-
-        <!-- ========================================== -->
-        <!-- VISTA 3: VISTA INTERACTIVA APARTADOS DÍAS  -->
-        <!-- ========================================== -->
-        <div id="view-diaria" class="hidden space-y-6">
-
-            <!-- Banner de Instrucción -->
-            <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-4 rounded-2xl shadow-sm">
-                <h2 class="text-base font-bold">Selecciona o pulsa cualquier apartado de día para desplegar su detalle</h2>
-                <p class="text-xs text-slate-300">Haz clic en una tarjeta diaria para filtrar el módulo interactivo de trabajo.</p>
-            </div>
-
-            <!-- 5 Tarjetas por Día -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div onclick="selectDay('lunes')" id="card-lunes" class="day-card active bg-white p-4 rounded-2xl border-2 border-slate-200 shadow-sm flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-[10px] font-extrabold text-slate-400">DÍA 1</span>
-                            <span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full">17/08</span>
-                        </div>
-                        <h3 class="text-base font-black text-slate-900">Lunes</h3>
-                    </div>
-                    <div class="mt-4 pt-2 border-t border-slate-100 flex justify-between items-end">
-                        <span class="text-xs text-slate-400">Piezas:</span>
-                        <span class="text-lg font-black text-blue-600">456</span>
-                    </div>
-                </div>
-
-                <div onclick="selectDay('martes')" id="card-martes" class="day-card bg-white p-4 rounded-2xl border-2 border-slate-200 shadow-sm flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-[10px] font-extrabold text-slate-400">DÍA 2</span>
-                            <span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full">18/08</span>
-                        </div>
-                        <h3 class="text-base font-black text-slate-900">Martes</h3>
-                    </div>
-                    <div class="mt-4 pt-2 border-t border-slate-100 flex justify-between items-end">
-                        <span class="text-xs text-slate-400">Piezas:</span>
-                        <span class="text-lg font-black text-blue-600">200</span>
-                    </div>
-                </div>
-
-                <div onclick="selectDay('miercoles')" id="card-miercoles" class="day-card bg-white p-4 rounded-2xl border-2 border-slate-200 shadow-sm flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-[10px] font-extrabold text-slate-400">DÍA 3</span>
-                            <span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full">19/08</span>
-                        </div>
-                        <h3 class="text-base font-black text-slate-900">Miércoles</h3>
-                    </div>
-                    <div class="mt-4 pt-2 border-t border-slate-100 flex justify-between items-end">
-                        <span class="text-xs text-slate-400">Piezas:</span>
-                        <span class="text-lg font-black text-blue-600">261</span>
-                    </div>
-                </div>
-
-                <div onclick="selectDay('jueves')" id="card-jueves" class="day-card bg-white p-4 rounded-2xl border-2 border-slate-200 shadow-sm flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-[10px] font-extrabold text-slate-400">DÍA 4</span>
-                            <span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full">20/08</span>
-                        </div>
-                        <h3 class="text-base font-black text-slate-900">Jueves</h3>
-                    </div>
-                    <div class="mt-4 pt-2 border-t border-slate-100 flex justify-between items-end">
-                        <span class="text-xs text-slate-400">Piezas:</span>
-                        <span class="text-lg font-black text-blue-600">357</span>
-                    </div>
-                </div>
-
-                <div onclick="selectDay('viernes')" id="card-viernes" class="day-card bg-white p-4 rounded-2xl border-2 border-slate-200 shadow-sm flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-[10px] font-extrabold text-slate-400">DÍA 5</span>
-                            <span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full">21/08</span>
-                        </div>
-                        <h3 class="text-base font-black text-slate-900">Viernes</h3>
-                    </div>
-                    <div class="mt-4 pt-2 border-t border-slate-100 flex justify-between items-end">
-                        <span class="text-xs text-slate-400">Piezas:</span>
-                        <span class="text-lg font-black text-emerald-600">437</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Módulo Desplegado -->
-            <div id="dynamicDetailPanel" class="bg-white rounded-2xl p-6 shadow-md border border-slate-200">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200 pb-4 mb-6 gap-3">
-                    <div>
-                        <span id="detailDayBadge" class="bg-blue-600 text-white text-[11px] font-black px-3 py-1 rounded-md uppercase">LUNES 17/08/2026</span>
-                        <h2 id="detailTitle" class="text-xl font-black text-slate-900 mt-1">Lunes 17 de Agosto</h2>
-                    </div>
-                    <div class="bg-blue-50 border border-blue-200 px-4 py-2 rounded-xl text-right">
-                        <span class="text-[10px] text-blue-600 font-bold uppercase block">Total Día</span>
-                        <span id="detailDayTotal" class="text-2xl font-black text-blue-700">456 Pcs</span>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <div class="lg:col-span-8 overflow-x-auto">
-                        <table class="w-full text-xs text-left text-slate-700">
-                            <thead class="bg-slate-100 text-slate-700 font-bold uppercase text-[10px]">
-                                <tr>
-                                    <th class="px-3.5 py-2">Cortador</th>
-                                    <th class="px-3.5 py-2">Entidad</th>
-                                    <th class="px-3.5 py-2">Prenda</th>
-                                    <th class="px-3.5 py-2 text-center">Género</th>
-                                    <th class="px-3.5 py-2 text-right">Piezas</th>
-                                </tr>
-                            </thead>
-                            <tbody id="detailTableBody" class="divide-y divide-slate-100 font-medium">
-                                <!-- Inyectado por JS -->
-                            </tbody>
-                        </table>
-                        <div id="detailNotes" class="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600"></div>
-                    </div>
-
-                    <div class="lg:col-span-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        <h3 class="text-xs font-bold text-slate-700 uppercase mb-2">Distribución Día</h3>
-                        <div class="h-44">
-                            <canvas id="dayChartCanvas"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 hover:border-amber-500/40 transition">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Cliente Top Quincena</p>
+          <h3 class="text-2xl font-black text-amber-400 mt-1">SEDAPAL</h3>
+          <p class="text-xs text-slate-300 mt-2">2,243 pcs acumuladas (69.7%)</p>
         </div>
 
-    </main>
+      </div>
 
-    <!-- Script Lógica JavaScript -->
-    <script>
-        const dayData = {
-            lunes: {
-                dateBadge: "LUNES 17/08/2026",
-                title: "Lunes 17 de Agosto",
-                total: "456 Pcs",
-                notes: "<strong>Observación:</strong> Inicio de semana con asistencia completa a destajo. Destaca la producción de 266 camisas para Ayacucho y 190 casacas con broche para Sedapal.",
-                items: [
-                    { cutter: "Elvis Mallma / Pedro Gorrio", client: "SEDAPAL", garment: "Casaca de Broche", gender: "Dama", qty: 190 },
-                    { cutter: "Doris Andrade / Roberto Serquén", client: "AYACUCHO", garment: "Camisa", gender: "Caballero", qty: 266 }
-                ],
-                chartData: [190, 266],
-                chartLabels: ["Elvis M. / Pedro G.", "Doris A. / Roberto S."]
-            },
-            martes: {
-                dateBadge: "MARTES 18/08/2026",
-                title: "Martes 18 de Agosto",
-                total: "200 Pcs",
-                notes: "<strong>Observación:</strong> Jornada reducida. Avance exclusivo de Elvis Mallma / Pedro Gorrio en casacas con cierre para Sedapal (200 pcs).",
-                items: [
-                    { cutter: "Elvis Mallma / Pedro Gorrio", client: "SEDAPAL", garment: "Casaca con Cierre", gender: "Dama", qty: 200 }
-                ],
-                chartData: [200, 0],
-                chartLabels: ["Elvis M. / Pedro G.", "Doris A. / Roberto S."]
-            },
-            miercoles: {
-                dateBadge: "MIÉRCOLES 19/08/2026",
-                title: "Miércoles 19 de Agosto",
-                total: "261 Pcs",
-                notes: "<strong>Observación:</strong> Producción en pantalones Dama para Sedapal (250 pcs) y faldas para Áncash (11 pcs).",
-                items: [
-                    { cutter: "Elvis Mallma / Pedro Gorrio", client: "ÁNCASH", garment: "Falda", gender: "Dama", qty: 11 },
-                    { cutter: "Elvis Mallma / Pedro Gorrio", client: "SEDAPAL", garment: "Pantalón", gender: "Dama", qty: 250 }
-                ],
-                chartData: [261, 0],
-                chartLabels: ["Elvis M. / Pedro G.", "Doris A. / Roberto S."]
-            },
-            jueves: {
-                dateBadge: "JUEVES 20/08/2026",
-                title: "Jueves 20 de Agosto",
-                total: "357 Pcs",
-                notes: "<strong>Observación:</strong> Fuerte incremento de ritmo (357 pcs). Doris & Roberto retornaron corte con 267 blusas Dama para Sedapal.",
-                items: [
-                    { cutter: "Elvis Mallma / Pedro Gorrio", client: "MOQUEGUA", garment: "Chaleco", gender: "Dama", qty: 77 },
-                    { cutter: "Elvis Mallma / Pedro Gorrio", client: "MOQUEGUA", garment: "Saco", gender: "Dama", qty: 9 },
-                    { cutter: "Doris Andrade / Roberto Serquén", client: "SEDAPAL", garment: "Blusa", gender: "Dama", qty: 267 },
-                    { cutter: "Doris Andrade / Roberto Serquén", client: "MOQUEGUA", garment: "Pantalón Dama", gender: "Dama", qty: 4 }
-                ],
-                chartData: [86, 271],
-                chartLabels: ["Elvis M. / Pedro G.", "Doris A. / Roberto S."]
-            },
-            viernes: {
-                dateBadge: "VIERNES 21/08/2026",
-                title: "Viernes 21 de Agosto",
-                total: "437 Pcs",
-                notes: "<strong>Observación:</strong> Máxima producción semanal (437 pcs). Gran volumen de blusas Sedapal (375 total día) y camisas Produce (62 pcs).",
-                items: [
-                    { cutter: "Elvis Mallma / Pedro Gorrio", client: "SEDAPAL", garment: "Casaca Broche", gender: "Dama", qty: 105 },
-                    { cutter: "Doris Andrade / Roberto Serquén", client: "SEDAPAL", garment: "Blusa", gender: "Dama", qty: 270 },
-                    { cutter: "Doris Andrade / Roberto Serquén", client: "PRODUCE", garment: "Camisa", gender: "Dama", qty: 62 }
-                ],
-                chartData: [105, 332],
-                chartLabels: ["Elvis M. / Pedro G.", "Doris A. / Roberto S."]
-            }
-        };
+      <!-- Gráficos Comparativos -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        let dayChartInstance = null;
-        let goalsChartInstance = null;
+        <!-- Gráfico Comparativo Semanal -->
+        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-white">Comparación de Volumen: Sem 1 vs. Sem 2</h3>
+              <p class="text-xs text-slate-400">Producción total por semana de trabajo</p>
+            </div>
+            <span class="text-xs px-2.5 py-1 bg-slate-800 text-slate-300 rounded-lg border border-slate-700">11 Días Operativos</span>
+          </div>
+          <div class="h-64">
+            <canvas id="chartComparacionSemanas"></canvas>
+          </div>
+        </div>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            renderWeeklyCharts();
-            renderGoalsChart();
-            selectDay('lunes');
-        });
+        <!-- Distribución Consolidada por Cliente -->
+        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h3 class="text-sm font-bold text-white">Distribución Acumulada por Cliente</h3>
+              <p class="text-xs text-slate-400">Participación sobre las 3,217 piezas totales</p>
+            </div>
+          </div>
+          <div class="h-64 flex justify-center items-center">
+            <canvas id="chartClientesConsolidado"></canvas>
+          </div>
+        </div>
 
-        function switchView(viewName) {
-            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`btn-${viewName}`).classList.add('active');
+      </div>
 
-            document.getElementById('view-semanal').classList.add('hidden');
-            document.getElementById('view-metas').classList.add('hidden');
-            document.getElementById('view-diaria').classList.add('hidden');
+      <!-- Tabla Consolidada de Producción Diario-Quincenal -->
+      <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
+        <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i data-lucide="table" class="w-4 h-4 text-blue-400"></i> Resumen de Producción por Día (Quincena)
+          </h3>
+          <span class="text-xs text-slate-400 font-medium">17 de Agosto al 28 de Agosto</span>
+        </div>
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-950 uppercase text-slate-400 font-bold border-b border-slate-800 text-[11px]">
+              <tr>
+                <th class="py-3 px-4">Semana</th>
+                <th class="py-3 px-4">Día</th>
+                <th class="py-3 px-4">Fecha</th>
+                <th class="py-3 px-4">Entidad Principal</th>
+                <th class="py-3 px-4">Prendas Procesadas</th>
+                <th class="py-3 px-4 text-right">Cant. Cortada</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60 font-medium">
+              <!-- Semana 1 -->
+              <tr class="hover:bg-slate-800/40"><td class="py-2.5 px-4 font-bold text-indigo-400">Semana 1</td><td class="py-2.5 px-4 text-white">Lunes</td><td class="py-2.5 px-4 text-slate-400">17/08/2026</td><td class="py-2.5 px-4 font-semibold text-blue-400">SEDAPAL / AYACUCHO</td><td class="py-2.5 px-4">Casaca Broche / Camisa</td><td class="py-2.5 px-4 text-right font-bold text-emerald-400">456 pcs</td></tr>
+              <tr class="hover:bg-slate-800/40"><td class="py-2.5 px-4 font-bold text-indigo-400">Semana 1</td><td class="py-2.5 px-4 text-white">Martes</td><td class="py-2.5 px-4 text-slate-400">18/08/2026</td><td class="py-2.5 px-4 font-semibold text-blue-400">SEDAPAL</td><td class="py-2.5 px-4">Casaca Cierre</td><td class="py-2.5 px-4 text-right font-bold text-emerald-400">200 pcs</td></tr>
+              <tr class="hover:bg-slate-800/40"><td class="py-2.5 px-4 font-bold text-indigo-400">Semana 1</td><td class="py-2.5 px-4 text-white">Miércoles</td><td class="py-2.5 px-4 text-slate-400">19/08/2026</td><td class="py-2.5 px-4 font-semibold text-blue-400">ÁNCASH / SEDAPAL</td><td class="py-2.5 px-4">Falda / Pantalón</td><td class="py-2.5 px-4 text-right font-bold text-emerald-400">261 pcs</td></tr>
+              <tr class="hover:bg-slate-800/40"><td class="py-2.5 px-4 font-bold text-indigo-400">Semana 1</td><td class="py-2.5 px-4 text-white">Jueves</td><td class="py-2.5 px-4 text-slate-400">20/08/2026</td><td class="py-2.5 px-4 font-semibold text-blue-400">MOQUEGUA / SEDAPAL</td><td class="py-2.5 px-4">Chaleco, Saco / Blusa</td><td class="py-2.5 px-4 text-right font-bold text-emerald-400">357 pcs</td></tr>
+              <tr class="hover:bg-slate-800/40 border-b-2 border-slate-800"><td class="py-2.5 px-4 font-bold text-indigo-400">Semana 1</td><td class="py-2.5 px-4 text-white">Viernes</td><td class="py-2.5 px-4 text-slate-400">21/08/2026</td><td class="py-2.5 px-4 font-semibold text-blue-400">SEDAPAL / PRODUCE</td><td class="py-2.5 px-4">Casaca, Blusa / Camisa</td><td class="py-2.5 px-4 text-right font-bold text-emerald-400">437 pcs</td></tr>
+              
+              <!-- Semana 2 -->
+              <tr class="hover:bg-slate-800/40"><td class="py-2.5 px-4 font-bold text-emerald-400">Semana 2</td><td class="py-2.5 px-4 text-white">Sábado</td><td class="py-2.5 px-4 text-slate-400">22/08/2026</td><td class="py-2.5 px-4 font-semibold text-blue-400">SEDAPAL</td><td class="py-2.5 px-4">Blusa Dama</td><td class="py-2.5 px-4 text-right font-bold text-emerald-400">381 pcs</td></tr>
+              <tr class="hover:bg-slate-800/40"><td class="py-2.5 px-4 font-bold text-emerald-400">Semana 2</td><td class="py-2.5 px-4 text-white">Lunes</td><td class="py-2.5 px-4 text-slate-400">24/08/2026</td><td class="py-2.5 px-4 font-semibold text-blue-400">SEDAPAL / PRODUCE / INEN / UNTEL</td><td class="py-2.5 px-4">Pantalón, Camisa, Falda</td><td class="py-2.5 px-4 text-right font-bold text-emerald-400">281 pcs</td></tr>
+              <tr class="hover:bg-slate-800/40"><td class="py-2.5 px-4 font-bold text-emerald-400">Semana 2</td><td class="py-2.5 px-4 text-white">Martes</td><td class="py-2.5 px-4 text-slate-400">25/08/2026</td><td class="py-2.5 px-4 font-semibold text-blue-400">BIBLIOTECA</td><td class="py-2.5 px-4">Camisa Caballero</td><td class="py-2.5 px-4 text-right font-bold text-emerald-400">50 pcs</td></tr>
+              <tr class="hover:bg-slate-800/40"><td class="py-2.5 px-4 font-bold text-emerald-400">Semana 2</td><td class="py-2.5 px-4 text-white">Miércoles</td><td class="py-2.5 px-4 text-slate-400">26/08/2026</td><td class="py-2.5 px-4 font-semibold text-blue-400">BIBLIOTECA / INEN</td><td class="py-2.5 px-4">Camisa, Pantalón, Blusa</td><td class="py-2.5 px-4 text-right font-bold text-emerald-400">128 pcs</td></tr>
+              <tr class="hover:bg-slate-800/40"><td class="py-2.5 px-4 font-bold text-emerald-400">Semana 2</td><td class="py-2.5 px-4 text-white">Jueves</td><td class="py-2.5 px-4 text-slate-400">27/08/2026</td><td class="py-2.5 px-4 font-semibold text-blue-400">SEDAPAL / BIBLIOTECA</td><td class="py-2.5 px-4">Pantalón, Casaca Cierre, Camisa</td><td class="py-2.5 px-4 text-right font-bold text-emerald-400">404 pcs</td></tr>
+              <tr class="hover:bg-slate-800/40"><td class="py-2.5 px-4 font-bold text-emerald-400">Semana 2</td><td class="py-2.5 px-4 text-white">Viernes (General)</td><td class="py-2.5 px-4 text-slate-400">28/08/2026</td><td class="py-2.5 px-4 font-semibold text-blue-400">AYACUCHO</td><td class="py-2.5 px-4">Camisa Manga Larga Caballero</td><td class="py-2.5 px-4 text-right font-bold text-emerald-400">162 pcs</td></tr>
+              <tr class="hover:bg-slate-800/40"><td class="py-2.5 px-4 font-bold text-emerald-400">Semana 2</td><td class="py-2.5 px-4 text-white">Viernes (Jorge Pinchi)</td><td class="py-2.5 px-4 text-slate-400">28/08/2026</td><td class="py-2.5 px-4 font-semibold text-blue-400">AYACUCHO</td><td class="py-2.5 px-4">Sacos Caballero</td><td class="py-2.5 px-4 text-right font-bold text-emerald-400">100 pcs</td></tr>
+            </tbody>
+            <tfoot class="bg-slate-950 font-black text-white text-xs border-t border-slate-800">
+              <tr>
+                <td colspan="5" class="py-3 px-4 text-right uppercase tracking-wider">TOTAL PIEZAS QUINCENALES (1,711 + 1,506):</td>
+                <td class="py-3 px-4 text-right text-amber-400 text-sm">3,217 pcs</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
 
-            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+    </section>
+
+    <!-- SECCIÓN 2: SEMANA 2 (DETALLE DE 1,506 PIEZAS) -->
+    <section id="sec-sem2" class="space-y-6 hidden">
+      <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-white">Detalle de Producción - Segunda Semana</h2>
+            <p class="text-xs text-slate-400">1,506 piezas cortadas registradas del 22/08 al 28/08</p>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-950 uppercase text-slate-400 font-bold border-b border-slate-800">
+              <tr>
+                <th class="py-3 px-4">Fecha</th>
+                <th class="py-3 px-4">Cortador / Personal</th>
+                <th class="py-3 px-4">Modalidad</th>
+                <th class="py-3 px-4">Cliente / Entidad</th>
+                <th class="py-3 px-4">Género</th>
+                <th class="py-3 px-4">Prenda</th>
+                <th class="py-3 px-4 text-right">Cant. Cortada</th>
+                <th class="py-3 px-4 text-center">Estado</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-sem2-body" class="divide-y divide-slate-800/60 font-medium">
+              <!-- Render dinámico desde JS -->
+            </tbody>
+            <tfoot class="bg-slate-950 font-bold text-white border-t border-slate-800">
+              <tr>
+                <td colspan="6" class="py-3 px-4 text-right">TOTAL SEMANA 2:</td>
+                <td class="py-3 px-4 text-right text-emerald-400 text-sm">1,506 pcs</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 3: SEMANA 1 (DETALLE DE 1,711 PIEZAS) -->
+    <section id="sec-sem1" class="space-y-6 hidden">
+      <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4">
+        <div>
+          <h2 class="text-lg font-bold text-white">Detalle de Producción - Primera Semana</h2>
+          <p class="text-xs text-slate-400">1,711 piezas cortadas registradas del 17/08 al 21/08 (Supervisor: Oswaldo Ramos)</p>
+        </div>
+
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-950 uppercase text-slate-400 font-bold border-b border-slate-800">
+              <tr>
+                <th class="py-3 px-4">Día</th>
+                <th class="py-3 px-4">Fecha</th>
+                <th class="py-3 px-4">Cortador</th>
+                <th class="py-3 px-4">Cliente / Entidad</th>
+                <th class="py-3 px-4">Prenda</th>
+                <th class="py-3 px-4 text-center">Género</th>
+                <th class="py-3 px-4 text-right">Cant. Cortada</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-sem1-body" class="divide-y divide-slate-800/60 font-medium">
+              <!-- Render dinámico desde JS -->
+            </tbody>
+            <tfoot class="bg-slate-950 font-bold text-white border-t border-slate-800">
+              <tr>
+                <td colspan="6" class="py-3 px-4 text-right">TOTAL SEMANA 1:</td>
+                <td class="py-3 px-4 text-right text-indigo-400 text-sm">1,711 pcs</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 4: METAS Y AVANCE POR ENTIDAD -->
+    <section id="sec-metas" class="space-y-6 hidden">
+      <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-5">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i data-lucide="target" class="w-5 h-5 text-amber-400"></i>
+              Control de Metas y Faltantes por Entidad, Prenda y Género
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">
+              Desglose detallado de avance. Puedes ajustar las metas requeridas en los casilleros de entrada.
+            </p>
+          </div>
+          <!-- Resumen Global de Metas -->
+          <div class="flex flex-wrap items-center gap-4 bg-slate-950 px-4 py-2.5 rounded-xl border border-slate-800 text-xs">
+            <div>
+              <span class="text-slate-400 block text-[10px]">TOTAL META REQUERIDA:</span>
+              <span id="meta-total-global" class="font-bold text-indigo-400 text-sm">3,534 pcs</span>
+            </div>
+            <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
+            <div>
+              <span class="text-slate-400 block text-[10px]">CORTADO A LA FECHA:</span>
+              <span id="meta-total-cortado" class="font-bold text-emerald-400 text-sm">3,217 pcs</span>
+            </div>
+            <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
+            <div>
+              <span class="text-slate-400 block text-[10px]">CUÁNTO FALTA:</span>
+              <span id="meta-total-falta" class="font-bold text-amber-400 text-sm">317 pcs</span>
+            </div>
+            <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
+            <div>
+              <span class="text-slate-400 block text-[10px]">AVANCE GLOBAL:</span>
+              <span id="meta-porcentaje-global" class="font-bold text-emerald-300 text-sm">91.0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtro por Entidad -->
+        <div class="flex items-center gap-3 bg-slate-950 p-3 rounded-xl border border-slate-800/80">
+          <i data-lucide="filter" class="w-4 h-4 text-slate-400"></i>
+          <span class="text-xs font-semibold text-slate-300">Filtrar por Entidad:</span>
+          <select id="filtro-entidad" onchange="filtrarTablaMetas()" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500">
+            <option value="TODAS">-- Todas las Entidades --</option>
+            <option value="SEDAPAL">SEDAPAL</option>
+            <option value="AYACUCHO">AYACUCHO</option>
+            <option value="PRODUCE">PRODUCE</option>
+            <option value="BIBLIOTECA">BIBLIOTECA</option>
+            <option value="INEN">INEN</option>
+            <option value="MOQUEGUA">MOQUEGUA</option>
+            <option value="ÁNCASH">ÁNCASH</option>
+            <option value="UNTEL">UNTEL</option>
+          </select>
+        </div>
+
+        <!-- Tabla Desglosada Requerida -->
+        <div class="overflow-x-auto custom-scrollbar rounded-xl border border-slate-800">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-950 uppercase text-slate-400 font-bold border-b border-slate-800 text-[11px] tracking-wider">
+              <tr>
+                <th class="py-3 px-4">Entidad</th>
+                <th class="py-3 px-4">Prenda Procesada</th>
+                <th class="py-3 px-4 text-center">Género</th>
+                <th class="py-3 px-4 text-center">Meta Requerida</th>
+                <th class="py-3 px-4 text-right">Cortado a la Fecha</th>
+                <th class="py-3 px-4 text-right">Cuánto Falta</th>
+                <th class="py-3 px-4 text-center">Avance (%)</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-metas-body" class="divide-y divide-slate-800/60 font-medium">
+              <!-- Carga dinámica vía JS -->
+            </tbody>
+            <tfoot class="bg-slate-950 font-black text-white text-xs border-t border-slate-800">
+              <tr>
+                <td colspan="3" class="py-3.5 px-4 text-right uppercase tracking-wider text-slate-400">TOTALES CONSOLIDADOS:</td>
+                <td id="foot-meta-total" class="py-3.5 px-4 text-center text-indigo-400 font-bold">3,534 pcs</td>
+                <td id="foot-cortado-total" class="py-3.5 px-4 text-right text-emerald-400 font-bold">3,217 pcs</td>
+                <td id="foot-falta-total" class="py-3.5 px-4 text-right text-amber-400 font-bold">317 pcs</td>
+                <td id="foot-avance-total" class="py-3.5 px-4 text-center text-emerald-300 font-bold">91.0%</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-slate-950 border-t border-slate-900 py-4 text-center text-xs text-slate-500">
+    <p>Sistema de Control de Corte y Producción Textil &copy; 2026. Consolidado Quincenal.</p>
+  </footer>
+
+  <!-- Lógica y Datos JavaScript -->
+  <script>
+    // --- DATOS SEMANA 1 (1,711 Pcs) ---
+    const datosSemana1 = [
+      { dia: "Lunes", fecha: "17/08/2026", cortador: "Elvis Mallma / Pedro Gorrio", cliente: "SEDAPAL", prenda: "Casaca Broche", genero: "Dama", cantidad: 190 },
+      { dia: "Lunes", fecha: "17/08/2026", cortador: "Doris Andrade / Roberto Serquén", cliente: "AYACUCHO", prenda: "Camisa", genero: "Caballero", cantidad: 266 },
+      { dia: "Martes", fecha: "18/08/2026", cortador: "Elvis Mallma / Pedro Gorrio", cliente: "SEDAPAL", prenda: "Casaca Cierre", genero: "Dama", cantidad: 200 },
+      { dia: "Miércoles", fecha: "19/08/2026", cortador: "Elvis Mallma / Pedro Gorrio", cliente: "ÁNCASH", prenda: "Falda", genero: "Dama", cantidad: 11 },
+      { dia: "Miércoles", fecha: "19/08/2026", cortador: "Elvis Mallma / Pedro Gorrio", cliente: "SEDAPAL", prenda: "Pantalón", genero: "Dama", cantidad: 250 },
+      { dia: "Jueves", fecha: "20/08/2026", cortador: "Elvis Mallma / Pedro Gorrio", cliente: "MOQUEGUA", prenda: "Chaleco", genero: "Dama", cantidad: 77 },
+      { dia: "Jueves", fecha: "20/08/2026", cortador: "Elvis Mallma / Pedro Gorrio", cliente: "MOQUEGUA", prenda: "Saco", genero: "Dama", cantidad: 9 },
+      { dia: "Jueves", fecha: "20/08/2026", cortador: "Doris Andrade / Roberto Serquén", cliente: "SEDAPAL", prenda: "Blusa", genero: "Dama", cantidad: 267 },
+      { dia: "Jueves", fecha: "20/08/2026", cortador: "Doris Andrade / Roberto Serquén", cliente: "MOQUEGUA", prenda: "Pantalón", genero: "Dama", cantidad: 4 },
+      { dia: "Viernes", fecha: "21/08/2026", cortador: "Elvis Mallma / Pedro Gorrio", cliente: "SEDAPAL", prenda: "Casaca Broche", genero: "Dama", cantidad: 105 },
+      { dia: "Viernes", fecha: "21/08/2026", cortador: "Doris Andrade / Roberto Serquén", cliente: "SEDAPAL", prenda: "Blusa", genero: "Dama", cantidad: 270 },
+      { dia: "Viernes", fecha: "21/08/2026", cortador: "Doris Andrade / Roberto Serquén", cliente: "PRODUCE", prenda: "Camisa", genero: "Dama", cantidad: 62 }
+    ];
+
+    // --- DATOS SEMANA 2 (1,506 Pcs) ---
+    const datosSemana2 = [
+      { id: 1, fecha: "22/08/2026", fechaLabel: "Sáb 22/08", cortador: "Doris Andrade / Roberto Serquén", modalidad: "DESTAJO", cliente: "SEDAPAL", genero: "DAMA", prenda: "BLUSA", cantidad: 381, estado: "COMPLETO" },
+      { id: 2, fecha: "24/08/2026", fechaLabel: "Lun 24/08", cortador: "Elvis Mallma / Pedro Gorrio", modalidad: "DESTAJO", cliente: "SEDAPAL", genero: "DAMA", prenda: "PANTALON", cantidad: 180, estado: "COMPLETO" },
+      { id: 3, fecha: "24/08/2026", fechaLabel: "Lun 24/08", cortador: "Elvis Mallma / Pedro Gorrio", modalidad: "DESTAJO", cliente: "UNTEL", genero: "DAMA", prenda: "FALDA", cantidad: 1, estado: "COMPLETO" },
+      { id: 4, fecha: "24/08/2026", fechaLabel: "Lun 24/08", cortador: "Elvis Mallma / Pedro Gorrio", modalidad: "DESTAJO", cliente: "INEN", genero: "CABALLERO", prenda: "PANTALON", cantidad: 38, estado: "COMPLETO" },
+      { id: 5, fecha: "24/08/2026", fechaLabel: "Lun 24/08", cortador: "Doris Andrade / Roberto Serquén", modalidad: "JORNAL", cliente: "PRODUCE", genero: "CABALLERO", prenda: "CAMISA", cantidad: 60, estado: "COMPLETO" },
+      { id: 6, fecha: "24/08/2026", fechaLabel: "Lun 24/08", cortador: "Doris Andrade / Roberto Serquén", modalidad: "JORNAL", cliente: "INEN", genero: "CABALLERO", prenda: "CAMISA", cantidad: 2, estado: "COMPLETO" },
+      { id: 7, fecha: "25/08/2026", fechaLabel: "Mar 25/08", cortador: "Doris Andrade / Roberto Serquén", modalidad: "JORNAL", cliente: "BIBLIOTECA", genero: "CABALLERO", prenda: "CAMISA", cantidad: 50, estado: "COMPLETO" },
+      { id: 8, fecha: "26/08/2026", fechaLabel: "Mié 26/08", cortador: "Elvis Mallma / Pedro Gorrio", modalidad: "DESTAJO", cliente: "INEN", genero: "DAMA", prenda: "PANTALON", cantidad: 48, estado: "COMPLETO" },
+      { id: 9, fecha: "26/08/2026", fechaLabel: "Mié 26/08", cortador: "Doris Andrade / Roberto Serquén", modalidad: "JORNAL", cliente: "BIBLIOTECA", genero: "CABALLERO", prenda: "CAMISA", cantidad: 56, estado: "COMPLETO" },
+      { id: 10, fecha: "26/08/2026", fechaLabel: "Mié 26/08", cortador: "Doris Andrade / Roberto Serquén", modalidad: "JORNAL", cliente: "INEN", genero: "DAMA", prenda: "BLUSA", cantidad: 24, estado: "COMPLETO" },
+      { id: 11, fecha: "27/08/2026", fechaLabel: "Jue 27/08", cortador: "Elvis Mallma / Pedro Gorrio", modalidad: "DESTAJO", cliente: "SEDAPAL", genero: "DAMA", prenda: "PANTALON", cantidad: 250, estado: "COMPLETO" },
+      { id: 12, fecha: "27/08/2026", fechaLabel: "Jue 27/08", cortador: "Elvis Mallma / Pedro Gorrio", modalidad: "DESTAJO", cliente: "SEDAPAL", genero: "DAMA", prenda: "CASACA CON CIERRE", cantidad: 150, estado: "COMPLETO" },
+      { id: 13, fecha: "27/08/2026", fechaLabel: "Jue 27/08", cortador: "Doris Andrade / Roberto Serquén", modalidad: "DESTAJO", cliente: "BIBLIOTECA", genero: "CABALLERO", prenda: "CAMISA", cantidad: 4, estado: "COMPLETO" },
+      { id: 14, fecha: "28/08/2026", fechaLabel: "Vie 28/08", cortador: "Doris Andrade / Roberto Serquén", modalidad: "JORNAL", cliente: "AYACUCHO", genero: "CABALLERO", prenda: "CAMISA MANGA LARGA", cantidad: 162, estado: "COMPLETO" },
+      { id: 15, fecha: "28/08/2026", fechaLabel: "Vie 28/08 (JP)", cortador: "Jorge Pinchi", modalidad: "JORNAL", cliente: "AYACUCHO", genero: "CABALLERO", prenda: "SACOS", cantidad: 100, estado: "COMPLETO" }
+    ];
+
+    // --- METAS DETALLADAS DESGLOSADAS POR ENTIDAD - PRENDA - GÉNERO ---
+    let metasDetalladas = [
+      // SEDAPAL
+      { entidad: "SEDAPAL", prenda: "Blusa", genero: "Dama", cortado: 918, meta: 918 },
+      { entidad: "SEDAPAL", prenda: "Pantalón", genero: "Dama", cortado: 680, meta: 700 },
+      { entidad: "SEDAPAL", prenda: "Casaca Cierre", genero: "Dama", cortado: 350, meta: 350 },
+      { entidad: "SEDAPAL", prenda: "Casaca Broche", genero: "Dama", cortado: 295, meta: 295 },
+      
+      // AYACUCHO
+      { entidad: "AYACUCHO", prenda: "Camisa", genero: "Caballero", cortado: 266, meta: 266 },
+      { entidad: "AYACUCHO", prenda: "Camisa Manga Larga", genero: "Caballero", cortado: 162, meta: 180 },
+      { entidad: "AYACUCHO", prenda: "Sacos", genero: "Caballero", cortado: 100, meta: 120 },
+      
+      // PRODUCE
+      { entidad: "PRODUCE", prenda: "Camisa", genero: "Dama", cortado: 62, meta: 65 },
+      { entidad: "PRODUCE", prenda: "Camisa", genero: "Caballero", cortado: 60, meta: 70 },
+      
+      // BIBLIOTECA
+      { entidad: "BIBLIOTECA", prenda: "Camisa", genero: "Caballero", cortado: 110, meta: 110 },
+      
+      // INEN
+      { entidad: "INEN", prenda: "Pantalón", genero: "Dama", cortado: 48, meta: 80 },
+      { entidad: "INEN", prenda: "Pantalón", genero: "Caballero", cortado: 38, meta: 60 },
+      { entidad: "INEN", prenda: "Blusa", genero: "Dama", cortado: 24, meta: 50 },
+      { entidad: "INEN", prenda: "Camisa", genero: "Caballero", cortado: 2, meta: 10 },
+      
+      // MOQUEGUA
+      { entidad: "MOQUEGUA", prenda: "Chaleco", genero: "Dama", cortado: 77, meta: 77 },
+      { entidad: "MOQUEGUA", prenda: "Saco", genero: "Dama", cortado: 9, meta: 9 },
+      { entidad: "MOQUEGUA", prenda: "Pantalón", genero: "Dama", cortado: 4, meta: 4 },
+      
+      // ÁNCASH
+      { entidad: "ÁNCASH", prenda: "Falda", genero: "Dama", cortado: 11, meta: 169 },
+      
+      // UNTEL
+      { entidad: "UNTEL", prenda: "Falda", genero: "Dama", cortado: 1, meta: 1 }
+    ];
+
+    // Variables de Gráficos
+    let chartCompSem, chartClientCons;
+
+    // --- INICIALIZACIÓN ---
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      renderTablaSemana1();
+      renderTablaSemana2();
+      renderTablaMetas();
+      initCharts();
+    });
+
+    // --- PESTAÑAS ---
+    function switchTab(tabName) {
+      const tabs = ['consolidado', 'sem2', 'sem1', 'metas'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        const sec = document.getElementById(`sec-${t}`);
+        
+        if (t === tabName) {
+          sec.classList.remove('hidden');
+          if (t === 'metas') {
+            btn.className = 'px-3.5 py-2 rounded-lg text-amber-300 bg-amber-500/20 font-bold transition-all flex items-center gap-2 border border-amber-500/40 shadow';
+          } else {
+            btn.className = 'px-3.5 py-2 rounded-lg bg-blue-600 text-white font-bold transition-all flex items-center gap-2 shadow';
+          }
+        } else {
+          sec.classList.add('hidden');
+          if (t === 'metas') {
+            btn.className = 'px-3.5 py-2 rounded-lg text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 transition-all flex items-center gap-2 border border-amber-500/30';
+          } else {
+            btn.className = 'px-3.5 py-2 rounded-lg text-slate-400 hover:text-slate-200 transition-all flex items-center gap-2';
+          }
         }
+      });
+      lucide.createIcons();
+    }
 
-        function selectDay(dayKey) {
-            document.querySelectorAll('.day-card').forEach(card => card.classList.remove('active'));
-            const selectedCard = document.getElementById(`card-${dayKey}`);
-            if (selectedCard) selectedCard.classList.add('active');
+    // RENDERIZAR TABLA SEMANA 1
+    function renderTablaSemana1() {
+      const tbody = document.getElementById('tabla-sem1-body');
+      tbody.innerHTML = '';
+      datosSemana1.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/40 transition";
+        tr.innerHTML = `
+          <td class="py-2.5 px-4 font-bold text-white">${row.dia}</td>
+          <td class="py-2.5 px-4 text-slate-400">${row.fecha}</td>
+          <td class="py-2.5 px-4 text-slate-300">${row.cortador}</td>
+          <td class="py-2.5 px-4 font-bold text-indigo-400">${row.cliente}</td>
+          <td class="py-2.5 px-4 text-slate-200">${row.prenda}</td>
+          <td class="py-2.5 px-4 text-center text-slate-400">${row.genero}</td>
+          <td class="py-2.5 px-4 text-right font-bold text-emerald-400">${row.cantidad.toLocaleString()} pcs</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
 
-            const data = dayData[dayKey];
+    // RENDERIZAR TABLA SEMANA 2
+    function renderTablaSemana2() {
+      const tbody = document.getElementById('tabla-sem2-body');
+      tbody.innerHTML = '';
+      datosSemana2.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/40 transition";
+        tr.innerHTML = `
+          <td class="py-2.5 px-4 font-bold text-white">${row.fechaLabel}</td>
+          <td class="py-2.5 px-4 text-slate-300">${row.cortador}</td>
+          <td class="py-2.5 px-4"><span class="px-2 py-0.5 text-[10px] rounded font-semibold ${row.modalidad === 'DESTAJO' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 'bg-blue-500/10 text-blue-400 border border-blue-500/30'}">${row.modalidad}</span></td>
+          <td class="py-2.5 px-4 font-bold text-blue-400">${row.cliente}</td>
+          <td class="py-2.5 px-4 text-slate-400">${row.genero}</td>
+          <td class="py-2.5 px-4 text-slate-200">${row.prenda}</td>
+          <td class="py-2.5 px-4 text-right font-bold text-emerald-400">${row.cantidad.toLocaleString()} pcs</td>
+          <td class="py-2.5 px-4 text-center"><span class="px-2 py-0.5 text-[10px] rounded-full bg-emerald-500/20 text-emerald-300 font-medium">${row.estado}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
 
-            document.getElementById('detailDayBadge').innerText = data.dateBadge;
-            document.getElementById('detailTitle').innerText = data.title;
-            document.getElementById('detailDayTotal').innerText = data.total;
-            document.getElementById('detailNotes').innerHTML = data.notes;
+    // RENDERIZAR CARDS DE METAS
+    function renderCardsMetas() {
+      const container = document.getElementById('cards-metas-clientes');
+      container.innerHTML = '';
 
-            const tbody = document.getElementById('detailTableBody');
-            tbody.innerHTML = '';
-            data.items.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 border-b border-slate-100';
-                tr.innerHTML = `
-                    <td class="px-3.5 py-2 font-bold text-slate-800">${item.cutter}</td>
-                    <td class="px-3.5 py-2 font-semibold text-blue-700">${item.client}</td>
-                    <td class="px-3.5 py-2">${item.garment}</td>
-                    <td class="px-3.5 py-2 text-center text-slate-500">${item.gender}</td>
-                    <td class="px-3.5 py-2 text-right font-black text-slate-900">${item.qty} Pcs</td>
-                `;
-                tbody.appendChild(tr);
-            });
+      let totalMeta = 0;
+      let totalCortado = 0;
 
-            renderDayChart(data.chartLabels, data.chartData);
+      metasClientes.forEach((m, idx) => {
+        const cortadoQuincena = m.sem1 + m.sem2;
+        totalMeta += m.meta;
+        totalCortado += cortadoQuincena;
+
+        const porcentaje = m.meta > 0 ? Math.min(Math.round((cortadoQuincena / m.meta) * 100), 100) : 0;
+        const faltante = Math.max(0, m.meta - cortadoQuincena);
+
+        const div = document.createElement('div');
+        div.className = "bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3";
+        div.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div>
+              <h4 class="font-black text-white text-base">${m.cliente}</h4>
+              <p class="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
+                Meta Requerida:
+                <input type="number" value="${m.meta}" onchange="actualizarMeta(${idx}, this.value)"
+                  class="w-20 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-indigo-300 font-bold focus:outline-none focus:border-indigo-500">
+                <span class="text-[10px] text-slate-500">pcs</span>
+              </p>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg text-xs font-bold ${porcentaje >= 100 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'}">
+              ${porcentaje}%
+            </span>
+          </div>
+
+          <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-500 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: ${porcentaje}%"></div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 pt-1 text-xs">
+            <div class="bg-slate-900 p-2 rounded border border-slate-800 text-center">
+              <span class="text-slate-500 block text-[9px]">Semana 1</span>
+              <span class="font-bold text-slate-300">${m.sem1} pcs</span>
+            </div>
+            <div class="bg-slate-900 p-2 rounded border border-slate-800 text-center">
+              <span class="text-slate-500 block text-[9px]">Semana 2</span>
+              <span class="font-bold text-slate-300">${m.sem2} pcs</span>
+            </div>
+            <div class="bg-slate-900 p-2 rounded border border-slate-800 text-center">
+              <span class="text-slate-500 block text-[9px]">Faltante</span>
+              <span class="font-bold ${faltante === 0 ? 'text-emerald-400' : 'text-amber-400'}">${faltante} pcs</span>
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+
+      document.getElementById('meta-total-global').innerText = `${totalMeta.toLocaleString()} pcs`;
+      document.getElementById('meta-total-cortado').innerText = `${totalCortado.toLocaleString()} pcs`;
+      const pctGlobal = totalMeta > 0 ? ((totalCortado / totalMeta) * 100).toFixed(1) : 0;
+      document.getElementById('meta-porcentaje-global').innerText = `${pctGlobal}%`;
+    }
+
+    function actualizarMeta(index, val) {
+      metasClientes[index].meta = parseInt(val) || 0;
+      renderCardsMetas();
+    }
+
+    // INICIALIZACIÓN DE GRÁFICOS CON CHART.JS
+    function initCharts() {
+      // Comparison Sem 1 vs Sem 2
+      const ctx1 = document.getElementById('chartComparacionSemanas').getContext('2d');
+      chartCompSem = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: ['Semana 1 (17/08 - 21/08)', 'Semana 2 (22/08 - 28/08)'],
+          datasets: [{
+            label: 'Piezas Cortadas',
+            data: [1711, 1506],
+            backgroundColor: ['#6366f1', '#10b981'],
+            borderRadius: 8,
+            barThickness: 60
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+            x: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { weight: 'bold' } } }
+          }
         }
+      });
 
-        function renderDayChart(labels, values) {
-            const ctx = document.getElementById('dayChartCanvas').getContext('2d');
-            if (dayChartInstance) dayChartInstance.destroy();
-
-            dayChartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: values,
-                        backgroundColor: ['#2563eb', '#10b981']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
-                }
-            });
+      // Pie Chart Consolidado
+      const ctx2 = document.getElementById('chartClientesConsolidado').getContext('2d');
+      chartClientCons = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ['SEDAPAL', 'AYACUCHO', 'PRODUCE', 'BIBLIOTECA', 'INEN', 'ÁNCASH', 'MOQUEGUA', 'UNTEL'],
+          datasets: [{
+            data: [2063, 528, 122, 110, 112, 11, 90, 1],
+            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#eab308', '#64748b'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'right', labels: { color: '#cbd5e1', font: { size: 11 } } }
+          }
         }
+      });
+    }
+  </script>
+</body>
+</html>
+    // RENDERIZAR TABLA DE METAS Y FALTANTES DESGLOSADA
+    function renderTablaMetas() {
+      const tbody = document.getElementById('tabla-metas-body');
+      const filtro = document.getElementById('filtro-entidad').value;
+      tbody.innerHTML = '';
 
-        function renderWeeklyCharts() {
-            // Bar
-            const ctx1 = document.getElementById('weeklyBarChart').getContext('2d');
-            new Chart(ctx1, {
-                type: 'bar',
-                data: {
-                    labels: ['Lunes 17', 'Martes 18', 'Miércoles 19', 'Jueves 20', 'Viernes 21'],
-                    datasets: [{
-                        label: 'Piezas Totales por Día',
-                        data: [456, 200, 261, 357, 437],
-                        backgroundColor: '#2563eb',
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } },
-                    plugins: { legend: { display: false } }
-                }
-            });
+      let sumMeta = 0;
+      let sumCortado = 0;
+      let sumFalta = 0;
 
-            // Donut
-            const ctx2 = document.getElementById('weeklyClientChart').getContext('2d');
-            new Chart(ctx2, {
-                type: 'doughnut',
-                data: {
-                    labels: ['SEDAPAL', 'AYACUCHO', 'MOQUEGUA', 'PRODUCE', 'ÁNCASH'],
-                    datasets: [{
-                        data: [1282, 266, 90, 62, 11],
-                        backgroundColor: ['#2563eb', '#6366f1', '#f59e0b', '#10b981', '#ec4899']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } }
-                }
-            });
+      metasDetalladas.forEach((item, index) => {
+        if (filtro !== "TODAS" && item.entidad !== filtro) return;
+
+        const falta = Math.max(0, item.meta - item.cortado);
+        const avance = item.meta > 0 ? ((item.cortado / item.meta) * 100) : 0;
+        const avanceFormatted = Math.min(avance, 100).toFixed(1);
+
+        sumMeta += item.meta;
+        sumCortado += item.cortado;
+        sumFalta += falta;
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/40 transition border-b border-slate-800/40";
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-extrabold text-blue-400">${item.entidad}</td>
+          <td class="py-3 px-4 font-semibold text-slate-100">${item.prenda}</td>
+          <td class="py-3 px-4 text-center">
+            <span class="px-2 py-0.5 text-[10px] rounded-full font-bold ${item.genero === 'Dama' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/30' : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30'}">
+              ${item.genero}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-center">
+            <input type="number" min="0" value="${item.meta}" onchange="actualizarMetaDetalle(${index}, this.value)"
+              class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-center font-bold text-indigo-300 focus:outline-none focus:border-indigo-500 text-xs">
+          </td>
+          <td class="py-3 px-4 text-right font-bold text-emerald-400">${item.cortado.toLocaleString()} pcs</td>
+          <td class="py-3 px-4 text-right font-bold ${falta === 0 ? 'text-slate-500' : 'text-amber-400'}">${falta.toLocaleString()} pcs</td>
+          <td class="py-3 px-4 text-center">
+            <div class="flex items-center justify-center gap-2">
+              <span class="font-bold text-xs ${avance >= 100 ? 'text-emerald-400' : 'text-indigo-300'}">${avanceFormatted}%</span>
+              <div class="w-12 bg-slate-800 h-1.5 rounded-full overflow-hidden hidden sm:block">
+                <div class="h-full ${avance >= 100 ? 'bg-emerald-400' : 'bg-indigo-500'}" style="width: ${Math.min(avance, 100)}%"></div>
+              </div>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Actualizar Totales del Footer de la Tabla
+      document.getElementById('foot-meta-total').innerText = `${sumMeta.toLocaleString()} pcs`;
+      document.getElementById('foot-cortado-total').innerText = `${sumCortado.toLocaleString()} pcs`;
+      document.getElementById('foot-falta-total').innerText = `${sumFalta.toLocaleString()} pcs`;
+      const pctGlobalFooter = sumMeta > 0 ? ((sumCortado / sumMeta) * 100).toFixed(1) : "0.0";
+      document.getElementById('foot-avance-total').innerText = `${pctGlobalFooter}%`;
+
+      // Actualizar Resumen Global
+      let totalMetaGlobal = 0;
+      let totalCortadoGlobal = 0;
+      metasDetalladas.forEach(m => {
+        totalMetaGlobal += m.meta;
+        totalCortadoGlobal += m.cortado;
+      });
+      const totalFaltaGlobal = Math.max(0, totalMetaGlobal - totalCortadoGlobal);
+      const pctGlobalHeader = totalMetaGlobal > 0 ? ((totalCortadoGlobal / totalMetaGlobal) * 100).toFixed(1) : "0.0";
+
+      document.getElementById('meta-total-global').innerText = `${totalMetaGlobal.toLocaleString()} pcs`;
+      document.getElementById('meta-total-cortado').innerText = `${totalCortadoGlobal.toLocaleString()} pcs`;
+      document.getElementById('meta-total-falta').innerText = `${totalFaltaGlobal.toLocaleString()} pcs`;
+      document.getElementById('meta-porcentaje-global').innerText = `${pctGlobalHeader}%`;
+    }
+
+    function filtrarTablaMetas() {
+      renderTablaMetas();
+    }
+
+    function actualizarMetaDetalle(index, valor) {
+      const val = parseInt(valor);
+      metasDetalladas[index].meta = isNaN(val) ? 0 : val;
+      renderTablaMetas();
+    }
+
+    // INICIALIZACIÓN DE GRÁFICOS CON CHART.JS
+    function initCharts() {
+      // Comparison Sem 1 vs Sem 2
+      const ctx1 = document.getElementById('chartComparacionSemanas').getContext('2d');
+      chartCompSem = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: ['Semana 1 (17/08 - 21/08)', 'Semana 2 (22/08 - 28/08)'],
+          datasets: [{
+            label: 'Piezas Cortadas',
+            data: [1711, 1506],
+            backgroundColor: ['#6366f1', '#10b981'],
+            borderRadius: 8,
+            barThickness: 60
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+            x: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { weight: 'bold' } } }
+          }
         }
+      });
 
-        function renderGoalsChart() {
-            const ctx = document.getElementById('goalsComparisonChart').getContext('2d');
-            if (goalsChartInstance) goalsChartInstance.destroy();
-
-            goalsChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: [
-                        'MOQUEGUA Chaleco', 'ÁNCASH Falda', 'MOQUEGUA Saco', 'MOQUEGUA Pantalón', 
-                        'PRODUCE Camisa', 'SEDAPAL Blusa', 'AYACUCHO Camisa', 'SEDAPAL Casaca Broche', 
-                        'SEDAPAL Pantalón', 'SEDAPAL Casaca Cierre'
-                    ],
-                    datasets: [
-                        {
-                            label: 'Meta Requerida (Pcs)',
-                            data: [77, 169, 89, 89, 73.5, 2067, 442, 689, 1378, 689],
-                            backgroundColor: '#e2e8f0',
-                            borderColor: '#cbd5e1',
-                            borderWidth: 1,
-                            borderRadius: 4
-                        },
-                        {
-                            label: 'Entregado / Cortado (Pcs)',
-                            data: [77, 169, 89, 89, 62, 537, 266, 430, 250, 200],
-                            backgroundColor: '#2563eb',
-                            borderRadius: 4
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } },
-                    plugins: { legend: { position: 'top' } }
-                }
-            });
+      // Pie Chart Consolidado (Valores exactos desglosados)
+      const ctx2 = document.getElementById('chartClientesConsolidado').getContext('2d');
+      chartClientCons = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ['SEDAPAL', 'AYACUCHO', 'PRODUCE', 'BIBLIOTECA', 'INEN', 'MOQUEGUA', 'ÁNCASH', 'UNTEL'],
+          datasets: [{
+            data: [2243, 528, 122, 110, 112, 90, 11, 1],
+            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#eab308', '#06b6d4', '#64748b'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'right', labels: { color: '#cbd5e1', font: { size: 11 } } }
+          }
         }
-    </script>
+      });
+    }
+  </script>
 </body>
 </html>
