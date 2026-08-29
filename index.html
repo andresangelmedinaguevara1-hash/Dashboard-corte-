@@ -266,37 +266,42 @@
           <div>
             <h2 class="text-lg font-bold text-white flex items-center gap-2">
               <i data-lucide="target" class="w-5 h-5 text-amber-400"></i>
-              Control de Metas y Faltantes por Entidad y Prenda
+              Control de Metas, Faltantes y Avance por Entidad
             </h2>
             <p class="text-xs text-slate-400 mt-1">
-              Análisis dinámico de avance. Puedes ajustar las metas en las casillas correspondientes.
+              Cálculo preciso del % de avance sobre la Meta Requerida y desglose de faltantes de corte y entrega.
             </p>
           </div>
-          <!-- Resumen Global de Metas -->
-        <div class="flex flex-wrap items-center gap-4 bg-slate-950 px-4 py-2.5 rounded-xl border border-slate-800 text-xs">
+          <!-- Resumen Global de Metas Corregido -->
+        <div class="flex flex-wrap items-center gap-3 bg-slate-950 px-4 py-2.5 rounded-xl border border-slate-800 text-xs">
           <div>
-            <span class="text-slate-400 block text-[10px]">TOTAL META REQUERIDA:</span>
+            <span class="text-slate-400 block text-[10px]">META REQUERIDA:</span>
             <span id="meta-total-global" class="font-bold text-indigo-400 text-sm">3,534 pcs</span>
           </div>
           <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
           <div>
-            <span class="text-slate-400 block text-[10px]">CORTADO A LA FECHA:</span>
+            <span class="text-slate-400 block text-[10px]">CORTADO:</span>
             <span id="meta-total-cortado" class="font-bold text-emerald-400 text-sm">3,217 pcs</span>
           </div>
           <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
           <div>
-            <span class="text-slate-400 block text-[10px]">TOTAL ENTREGADO:</span>
+            <span class="text-slate-400 block text-[10px]">ENTREGADO:</span>
             <span id="meta-total-entregado" class="font-bold text-blue-400 text-sm">3,115 pcs</span>
           </div>
           <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
           <div>
-            <span class="text-slate-400 block text-[10px]">PENDIENTE DE ENTREGA:</span>
-            <span id="meta-total-falta" class="font-bold text-amber-400 text-sm">102 pcs</span>
+            <span class="text-slate-400 block text-[10px]">FALTA CORTAR:</span>
+            <span id="meta-total-falta-cortar" class="font-bold text-amber-400 text-sm">317 pcs</span>
           </div>
           <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
           <div>
-            <span class="text-slate-400 block text-[10px]">AVANCE DE ENTREGA:</span>
-            <span id="meta-porcentaje-global" class="font-bold text-emerald-300 text-sm">96.8%</span>
+            <span class="text-slate-400 block text-[10px]">PEND. ENTREGA:</span>
+            <span id="meta-total-falta-entrega" class="font-bold text-orange-400 text-sm">102 pcs</span>
+          </div>
+          <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
+          <div>
+            <span class="text-slate-400 block text-[10px]">% AVANCE CORTE:</span>
+            <span id="meta-porcentaje-corte-global" class="font-bold text-emerald-300 text-sm">91.0%</span>
           </div>
         </div>
       </div>
@@ -318,7 +323,7 @@
         </select>
       </div>
 
-      <!-- TABLA DESGLOSADA CON META, CORTADO Y CANTIDAD ENTREGADA EDITABLES -->
+      <!-- TABLA DESGLOSADA CON FÓRMULAS CORREGIDAS -->
       <div class="overflow-x-auto custom-scrollbar rounded-xl border border-slate-800">
         <table class="w-full text-left text-xs text-slate-300">
           <thead class="bg-slate-950 uppercase text-slate-300 font-bold border-b border-slate-800 text-[11px] tracking-wider">
@@ -327,10 +332,12 @@
               <th class="py-3.5 px-3 text-left">PRENDA PROCESADA</th>
               <th class="py-3.5 px-3 text-center">GÉNERO</th>
               <th class="py-3.5 px-3 text-center">META REQUERIDA ✏️</th>
-              <th class="py-3.5 px-3 text-center">CANT. CORTADA HASTA LA FECHA ✏️</th>
+              <th class="py-3.5 px-3 text-center">CANT. CORTADA ✏️</th>
               <th class="py-3.5 px-3 text-center">CANT. ENTREGADA ✏️</th>
-              <th class="py-3.5 px-3 text-right">PENDIENTE X ENTREGAR</th>
-              <th class="py-3.5 px-3 text-center">% ENTREGA</th>
+              <th class="py-3.5 px-3 text-center">FALTA CORTAR (Meta - Cortado)</th>
+              <th class="py-3.5 px-3 text-center">PEND. ENTREGA (Cortado - Entregado)</th>
+              <th class="py-3.5 px-3 text-center">% AVANCE CORTE</th>
+              <th class="py-3.5 px-3 text-center">% AVANCE ENTREGA</th>
             </tr>
           </thead>
           <tbody id="tabla-metas-body" class="divide-y divide-slate-800/60 font-medium">
@@ -340,10 +347,12 @@
             <tr>
               <td colspan="3" class="py-3.5 px-3 text-right uppercase tracking-wider text-slate-400">TOTALES CONSOLIDADOS:</td>
               <td id="foot-meta-total" class="py-3.5 px-3 text-center text-indigo-400 font-bold">3,534 pcs</td>
-              <td id="foot-cortado-total" class="py-3.5 px-3 text-right text-emerald-400 font-bold">3,217 pcs</td>
+              <td id="foot-cortado-total" class="py-3.5 px-3 text-center text-emerald-400 font-bold">3,217 pcs</td>
               <td id="foot-entregado-total" class="py-3.5 px-3 text-center text-blue-400 font-bold">3,115 pcs</td>
-              <td id="foot-falta-total" class="py-3.5 px-3 text-right text-amber-400 font-bold">102 pcs</td>
-              <td id="foot-avance-total" class="py-3.5 px-3 text-center text-emerald-300 font-bold">96.8%</td>
+              <td id="foot-falta-cortar-total" class="py-3.5 px-3 text-center text-amber-400 font-bold">317 pcs</td>
+              <td id="foot-falta-entrega-total" class="py-3.5 px-3 text-center text-orange-400 font-bold">102 pcs</td>
+              <td id="foot-avance-corte-total" class="py-3.5 px-3 text-center text-emerald-300 font-bold">91.0%</td>
+              <td id="foot-avance-entrega-total" class="py-3.5 px-3 text-center text-blue-300 font-bold">88.1%</td>
             </tr>
           </tfoot>
         </table>
@@ -454,19 +463,32 @@
       let sumMeta = 0;
       let sumCortado = 0;
       let sumEntregado = 0;
-      let sumFalta = 0;
+      let sumFaltaCortar = 0;
+      let sumFaltaEntrega = 0;
 
       metasDetalladas.forEach((item, index) => {
         if (filtro !== "TODAS" && item.entidad !== filtro) return;
 
-        const faltaEntregar = Math.max(0, item.cortado - item.entregado);
-        const avance = item.cortado > 0 ? ((item.entregado / item.cortado) * 100) : 0;
-        const avanceFormatted = Math.min(avance, 100).toFixed(1);
+        // Fórmulas corregidas:
+        // 1. Falta Cortar = Meta Requerida - Cantidad Cortada
+        const faltaCortar = Math.max(0, item.meta - item.cortado);
+        
+        // 2. Pendiente por Entregar = Cantidad Cortada - Cantidad Entregada
+        const faltaEntrega = Math.max(0, item.cortado - item.entregado);
+
+        // 3. Porcentaje de Avance de Corte = (Cantidad Cortada / Meta Requerida) * 100
+        const pctAvanceCorte = item.meta > 0 ? ((item.cortado / item.meta) * 100) : 0;
+        const pctAvanceCorteFormatted = Math.min(pctAvanceCorte, 100).toFixed(1);
+
+        // 4. Porcentaje de Avance de Entrega = (Cantidad Entregada / Meta Requerida) * 100
+        const pctAvanceEntrega = item.meta > 0 ? ((item.entregado / item.meta) * 100) : 0;
+        const pctAvanceEntregaFormatted = Math.min(pctAvanceEntrega, 100).toFixed(1);
 
         sumMeta += item.meta;
         sumCortado += item.cortado;
         sumEntregado += item.entregado;
-        sumFalta += faltaEntregar;
+        sumFaltaCortar += faltaCortar;
+        sumFaltaEntrega += faltaEntrega;
 
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-800/40 transition border-b border-slate-800/40";
@@ -491,12 +513,21 @@
             <input type="number" min="0" value="${item.entregado}" onchange="actualizarEntregadoDetalle(${index}, this.value)"
               class="w-20 bg-slate-900 border border-blue-600/60 rounded-lg px-2 py-1 text-center font-bold text-blue-300 focus:outline-none focus:border-blue-400 text-xs">
           </td>
-          <td class="py-3 px-3 text-right font-bold ${faltaEntregar === 0 ? 'text-slate-500' : 'text-amber-400'}">${faltaEntregar.toLocaleString()} pcs</td>
+          <td class="py-3 px-3 text-center font-bold ${faltaCortar === 0 ? 'text-slate-500' : 'text-amber-400'}">${faltaCortar.toLocaleString()} pcs</td>
+          <td class="py-3 px-3 text-center font-bold ${faltaEntrega === 0 ? 'text-slate-500' : 'text-orange-400'}">${faltaEntrega.toLocaleString()} pcs</td>
           <td class="py-3 px-3 text-center">
-            <div class="flex items-center justify-center gap-2">
-              <span class="font-bold text-xs ${avance >= 100 ? 'text-emerald-400' : 'text-amber-300'}">${avanceFormatted}%</span>
-              <div class="w-12 bg-slate-800 h-1.5 rounded-full overflow-hidden hidden sm:block">
-                <div class="h-full ${avance >= 100 ? 'bg-emerald-400' : 'bg-amber-400'}" style="width: ${Math.min(avance, 100)}%"></div>
+            <div class="flex items-center justify-center gap-1.5">
+              <span class="font-bold text-xs ${pctAvanceCorte >= 100 ? 'text-emerald-400' : 'text-amber-300'}">${pctAvanceCorteFormatted}%</span>
+              <div class="w-10 bg-slate-800 h-1.5 rounded-full overflow-hidden hidden sm:block">
+                <div class="h-full ${pctAvanceCorte >= 100 ? 'bg-emerald-400' : 'bg-amber-400'}" style="width: ${Math.min(pctAvanceCorte, 100)}%"></div>
+              </div>
+            </div>
+          </td>
+          <td class="py-3 px-3 text-center">
+            <div class="flex items-center justify-center gap-1.5">
+              <span class="font-bold text-xs ${pctAvanceEntrega >= 100 ? 'text-blue-400' : 'text-orange-300'}">${pctAvanceEntregaFormatted}%</span>
+              <div class="w-10 bg-slate-800 h-1.5 rounded-full overflow-hidden hidden sm:block">
+                <div class="h-full ${pctAvanceEntrega >= 100 ? 'bg-blue-400' : 'bg-orange-400'}" style="width: ${Math.min(pctAvanceEntrega, 100)}%"></div>
               </div>
             </div>
           </td>
@@ -504,20 +535,26 @@
         tbody.appendChild(tr);
       });
 
-      // Actualizar Totales Footer
+      // Actualizar Totales Footer de la Tabla
       const footMeta = document.getElementById('foot-meta-total');
       const footCortado = document.getElementById('foot-cortado-total');
       const footEntregado = document.getElementById('foot-entregado-total');
-      const footFalta = document.getElementById('foot-falta-total');
-      const footAvance = document.getElementById('foot-avance-total');
+      const footFaltaCortar = document.getElementById('foot-falta-cortar-total');
+      const footFaltaEntrega = document.getElementById('foot-falta-entrega-total');
+      const footAvanceCorte = document.getElementById('foot-avance-corte-total');
+      const footAvanceEntrega = document.getElementById('foot-avance-entrega-total');
 
       if (footMeta) footMeta.innerText = `${sumMeta.toLocaleString()} pcs`;
       if (footCortado) footCortado.innerText = `${sumCortado.toLocaleString()} pcs`;
       if (footEntregado) footEntregado.innerText = `${sumEntregado.toLocaleString()} pcs`;
-      if (footFalta) footFalta.innerText = `${sumFalta.toLocaleString()} pcs`;
+      if (footFaltaCortar) footFaltaCortar.innerText = `${sumFaltaCortar.toLocaleString()} pcs`;
+      if (footFaltaEntrega) footFaltaEntrega.innerText = `${sumFaltaEntrega.toLocaleString()} pcs`;
       
-      const pctGlobalFooter = sumCortado > 0 ? ((sumEntregado / sumCortado) * 100).toFixed(1) : "0.0";
-      if (footAvance) footAvance.innerText = `${pctGlobalFooter}%`;
+      const pctCorteFooter = sumMeta > 0 ? ((sumCortado / sumMeta) * 100).toFixed(1) : "0.0";
+      const pctEntregaFooter = sumMeta > 0 ? ((sumEntregado / sumMeta) * 100).toFixed(1) : "0.0";
+
+      if (footAvanceCorte) footAvanceCorte.innerText = `${pctCorteFooter}%`;
+      if (footAvanceEntrega) footAvanceEntrega.innerText = `${pctEntregaFooter}%`;
 
       // Resumen Global Superior
       let totalMetaGlobal = 0;
@@ -530,20 +567,23 @@
         totalEntregadoGlobal += m.entregado;
       });
 
-      const totalFaltaGlobal = Math.max(0, totalCortadoGlobal - totalEntregadoGlobal);
-      const pctGlobalHeader = totalCortadoGlobal > 0 ? ((totalEntregadoGlobal / totalCortadoGlobal) * 100).toFixed(1) : "0.0";
+      const totalFaltaCortarGlobal = Math.max(0, totalMetaGlobal - totalCortadoGlobal);
+      const totalFaltaEntregaGlobal = Math.max(0, totalCortadoGlobal - totalEntregadoGlobal);
+      const pctGlobalCorteHeader = totalMetaGlobal > 0 ? ((totalCortadoGlobal / totalMetaGlobal) * 100).toFixed(1) : "0.0";
 
       const metaGlob = document.getElementById('meta-total-global');
       const cortGlob = document.getElementById('meta-total-cortado');
       const entGlob = document.getElementById('meta-total-entregado');
-      const faltaGlob = document.getElementById('meta-total-falta');
-      const pctGlob = document.getElementById('meta-porcentaje-global');
+      const faltaCortarGlob = document.getElementById('meta-total-falta-cortar');
+      const faltaEntregaGlob = document.getElementById('meta-total-falta-entrega');
+      const pctCorteGlob = document.getElementById('meta-porcentaje-corte-global');
 
       if (metaGlob) metaGlob.innerText = `${totalMetaGlobal.toLocaleString()} pcs`;
       if (cortGlob) cortGlob.innerText = `${totalCortadoGlobal.toLocaleString()} pcs`;
       if (entGlob) entGlob.innerText = `${totalEntregadoGlobal.toLocaleString()} pcs`;
-      if (faltaGlob) faltaGlob.innerText = `${totalFaltaGlobal.toLocaleString()} pcs`;
-      if (pctGlob) pctGlob.innerText = `${pctGlobalHeader}%`;
+      if (faltaCortarGlob) faltaCortarGlob.innerText = `${totalFaltaCortarGlobal.toLocaleString()} pcs`;
+      if (faltaEntregaGlob) faltaEntregaGlob.innerText = `${totalFaltaEntregaGlobal.toLocaleString()} pcs`;
+      if (pctCorteGlob) pctCorteGlob.innerText = `${pctGlobalCorteHeader}%`;
     };
 
     window.filtrarTablaMetas = function() {
