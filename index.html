@@ -328,7 +328,7 @@
                 <th class="py-3.5 px-3 text-center">CORTADA ✏️</th>
                 <th class="py-3.5 px-3 text-center">ENTREGADA ✏️</th>
                 <th class="py-3.5 px-3 text-center">(META - CORTADO)</th>
-                <th class="py-3.5 px-3 text-center">(CORTADO - ENTREGADO)</th>
+                <th class="py-3.5 px-3 text-center">(META - ENTREGADO)</th>
                 <th class="py-3.5 px-3 text-center">CORTE %</th>
                 <th class="py-3.5 px-3 text-center">ENTREGA %</th>
               </tr>
@@ -384,7 +384,7 @@
     // --- METAS DETALLADAS DESGLOSADAS ---
     let metasDetalladas = [
       // SEDAPAL
-      { entidad: "SEDAPAL", prenda: "Blusa", genero: "Dama", meta: 1378, cortado: 381, entregado: 738 },
+      { entidad: "SEDAPAL", prenda: "Blusa", genero: "Dama", meta: 1378, cortado: 381, entregado: 918 },
       { entidad: "SEDAPAL", prenda: "Pantalón", genero: "Dama", meta: 1378, cortado: 250, entregado: 680 },
       { entidad: "SEDAPAL", prenda: "Casaca Cierre", genero: "Dama", meta: 689, cortado: 150, entregado: 350 },
       { entidad: "SEDAPAL", prenda: "Casaca Broche", genero: "Dama", meta: 689, cortado: 0, entregado: 430 },
@@ -464,7 +464,7 @@
         if (filtro !== "TODAS" && item.entidad !== filtro) return;
 
         const faltaCortar = Math.max(0, item.meta - item.cortado);
-        const faltaEntrega = Math.max(0, item.cortado - item.entregado);
+        const faltaEntrega = Math.max(0, item.meta - item.entregado);
 
         const pctCorte = item.meta > 0 ? ((item.cortado / item.meta) * 100) : 0;
         const pctEntrega = item.meta > 0 ? ((item.entregado / item.meta) * 100) : 0;
@@ -539,7 +539,7 @@
       });
 
       const totalFaltaCortarGlobal = Math.max(0, totalMetaGlobal - totalCortadoGlobal);
-      const totalFaltaEntregaGlobal = Math.max(0, totalCortadoGlobal - totalEntregadoGlobal);
+      const totalFaltaEntregaGlobal = Math.max(0, totalMetaGlobal - totalEntregadoGlobal);
       const pctGlobalEntregaHeader = totalMetaGlobal > 0 ? ((totalEntregadoGlobal / totalMetaGlobal) * 100).toFixed(1) : "0.0";
 
       const metaGlob = document.getElementById('meta-total-global');
