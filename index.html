@@ -273,193 +273,245 @@
             </p>
           </div>
           <!-- Resumen Global de Metas -->
-          <div class="flex flex-wrap items-center gap-4 bg-slate-950 px-4 py-2.5 rounded-xl border border-slate-800 text-xs">
-            <div>
-              <span class="text-slate-400 block text-[10px]">TOTAL META REQUERIDA:</span>
-              <span id="meta-total-global" class="font-bold text-indigo-400 text-sm">3,534 pcs</span>
-            </div>
-            <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
-            <div>
-              <span class="text-slate-400 block text-[10px]">CORTADO A LA FECHA:</span>
-              <span id="meta-total-cortado" class="font-bold text-emerald-400 text-sm">3,217 pcs</span>
-            </div>
-            <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
-            <div>
-              <span class="text-slate-400 block text-[10px]">CUÁNTO FALTA:</span>
-              <span id="meta-total-falta" class="font-bold text-amber-400 text-sm">317 pcs</span>
-            </div>
-            <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
-            <div>
-              <span class="text-slate-400 block text-[10px]">AVANCE GLOBAL:</span>
-              <span id="meta-porcentaje-global" class="font-bold text-emerald-300 text-sm">91.0%</span>
-            </div>
+        <div class="flex flex-wrap items-center gap-4 bg-slate-950 px-4 py-2.5 rounded-xl border border-slate-800 text-xs">
+          <div>
+            <span class="text-slate-400 block text-[10px]">TOTAL META REQUERIDA:</span>
+            <span id="meta-total-global" class="font-bold text-indigo-400 text-sm">3,534 pcs</span>
+          </div>
+          <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
+          <div>
+            <span class="text-slate-400 block text-[10px]">CORTADO A LA FECHA:</span>
+            <span id="meta-total-cortado" class="font-bold text-emerald-400 text-sm">3,217 pcs</span>
+          </div>
+          <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
+          <div>
+            <span class="text-slate-400 block text-[10px]">TOTAL ENTREGADO:</span>
+            <span id="meta-total-entregado" class="font-bold text-blue-400 text-sm">3,115 pcs</span>
+          </div>
+          <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
+          <div>
+            <span class="text-slate-400 block text-[10px]">PENDIENTE DE ENTREGA:</span>
+            <span id="meta-total-falta" class="font-bold text-amber-400 text-sm">102 pcs</span>
+          </div>
+          <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
+          <div>
+            <span class="text-slate-400 block text-[10px]">AVANCE DE ENTREGA:</span>
+            <span id="meta-porcentaje-global" class="font-bold text-emerald-300 text-sm">96.8%</span>
           </div>
         </div>
-
-        <!-- Filtro por Entidad -->
-        <div class="flex items-center gap-3 bg-slate-950 p-3 rounded-xl border border-slate-800/80">
-          <i data-lucide="filter" class="w-4 h-4 text-slate-400"></i>
-          <span class="text-xs font-semibold text-slate-300">Filtrar por Entidad:</span>
-          <select id="filtro-entidad" onchange="filtrarTablaMetas()" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500">
-            <option value="TODAS">-- Todas las Entidades --</option>
-            <option value="SEDAPAL">SEDAPAL</option>
-            <option value="AYACUCHO">AYACUCHO</option>
-            <option value="PRODUCE">PRODUCE</option>
-            <option value="BIBLIOTECA">BIBLIOTECA</option>
-            <option value="INEN">INEN</option>
-            <option value="MOQUEGUA">MOQUEGUA</option>
-            <option value="ÁNCASH">ÁNCASH</option>
-            <option value="UNTEL">UNTEL</option>
-          </select>
-        </div>
-
-        <!-- TABLA DESGLOSADA CON LAS 7 COLUMNAS SOLICITADAS -->
-        <div class="overflow-x-auto custom-scrollbar rounded-xl border border-slate-800">
-          <table class="w-full text-left text-xs text-slate-300">
-            <thead class="bg-slate-950 uppercase text-slate-300 font-bold border-b border-slate-800 text-[11px] tracking-wider">
-              <tr>
-                <th class="py-3.5 px-4 text-left">ENTIDAD</th>
-                <th class="py-3.5 px-4 text-left">PRENDA PROCESADA</th>
-                <th class="py-3.5 px-4 text-center">GÉNERO</th>
-                <th class="py-3.5 px-4 text-center">META REQUERIDA</th>
-                <th class="py-3.5 px-4 text-right">CANTIDAD CORTADA HASTA LA FECHA</th>
-                <th class="py-3.5 px-4 text-right">CUÁNTO FALTA</th>
-                <th class="py-3.5 px-4 text-center">AVANCE (%)</th>
-              </tr>
-            </thead>
-            <tbody id="tabla-metas-body" class="divide-y divide-slate-800/60 font-medium">
-              <!-- Renderizado dinámico desde JavaScript -->
-            </tbody>
-            <tfoot class="bg-slate-950 font-black text-white text-xs border-t border-slate-800">
-              <tr>
-                <td colspan="3" class="py-3.5 px-4 text-right uppercase tracking-wider text-slate-400">TOTALES CONSOLIDADOS:</td>
-                <td id="foot-meta-total" class="py-3.5 px-4 text-center text-indigo-400 font-bold">3,534 pcs</td>
-                <td id="foot-cortado-total" class="py-3.5 px-4 text-right text-emerald-400 font-bold">3,217 pcs</td>
-                <td id="foot-falta-total" class="py-3.5 px-4 text-right text-amber-400 font-bold">317 pcs</td>
-                <td id="foot-avance-total" class="py-3.5 px-4 text-center text-emerald-300 font-bold">91.0%</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
       </div>
-    </section>
 
-  </main>
+      <!-- Filtro por Entidad -->
+      <div class="flex items-center gap-3 bg-slate-950 p-3 rounded-xl border border-slate-800/80">
+        <i data-lucide="filter" class="w-4 h-4 text-slate-400"></i>
+        <span class="text-xs font-semibold text-slate-300">Filtrar por Entidad:</span>
+        <select id="filtro-entidad" onchange="filtrarTablaMetas()" class="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500">
+          <option value="TODAS">-- Todas las Entidades --</option>
+          <option value="SEDAPAL">SEDAPAL</option>
+          <option value="AYACUCHO">AYACUCHO</option>
+          <option value="PRODUCE">PRODUCE</option>
+          <option value="BIBLIOTECA">BIBLIOTECA</option>
+          <option value="INEN">INEN</option>
+          <option value="MOQUEGUA">MOQUEGUA</option>
+          <option value="ÁNCASH">ÁNCASH</option>
+          <option value="UNTEL">UNTEL</option>
+        </select>
+      </div>
 
-  <!-- Footer -->
+      <!-- TABLA DESGLOSADA CON META, CORTADO Y CANTIDAD ENTREGADA EDITABLES -->
+      <div class="overflow-x-auto custom-scrollbar rounded-xl border border-slate-800">
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead class="bg-slate-950 uppercase text-slate-300 font-bold border-b border-slate-800 text-[11px] tracking-wider">
+            <tr>
+              <th class="py-3.5 px-3 text-left">ENTIDAD</th>
+              <th class="py-3.5 px-3 text-left">PRENDA PROCESADA</th>
+              <th class="py-3.5 px-3 text-center">GÉNERO</th>
+              <th class="py-3.5 px-3 text-center">META REQUERIDA ✏️</th>
+              <th class="py-3.5 px-3 text-center">CANT. CORTADA HASTA LA FECHA ✏️</th>
+              <th class="py-3.5 px-3 text-center">CANT. ENTREGADA ✏️</th>
+              <th class="py-3.5 px-3 text-right">PENDIENTE X ENTREGAR</th>
+              <th class="py-3.5 px-3 text-center">% ENTREGA</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-metas-body" class="divide-y divide-slate-800/60 font-medium">
+            <!-- Renderizado dinámico desde JavaScript -->
+          </tbody>
+          <tfoot class="bg-slate-950 font-black text-white text-xs border-t border-slate-800">
+            <tr>
+              <td colspan="3" class="py-3.5 px-3 text-right uppercase tracking-wider text-slate-400">TOTALES CONSOLIDADOS:</td>
+              <td id="foot-meta-total" class="py-3.5 px-3 text-center text-indigo-400 font-bold">3,534 pcs</td>
+              <td id="foot-cortado-total" class="py-3.5 px-3 text-right text-emerald-400 font-bold">3,217 pcs</td>
+              <td id="foot-entregado-total" class="py-3.5 px-3 text-center text-blue-400 font-bold">3,115 pcs</td>
+              <td id="foot-falta-total" class="py-3.5 px-3 text-right text-amber-400 font-bold">102 pcs</td>
+              <td id="foot-avance-total" class="py-3.5 px-3 text-center text-emerald-300 font-bold">96.8%</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
   <footer class="bg-slate-950 border-t border-slate-900 py-4 text-center text-xs text-slate-500">
     <p>Sistema de Control de Corte y Producción Textil &copy; 2026. Consolidado Quincenal.</p>
   </footer>
 
   <script>
     // --- DATOS SEMANA 1 (1,711 Pcs) ---
-    const datosSemana1 = [
-      { dia: "Lunes", fecha: "17/08/2026", cortador: "Elvis Mallma / Pedro Gorrio", cliente: "SEDAPAL", prenda: "Casaca Broche", genero: "Dama", cantidad: 190 },
-      { dia: "Lunes", fecha: "17/08/2026", cortador: "Doris Andrade / Roberto Serquén", cliente: "AYACUCHO", prenda: "Camisa", genero: "Caballero", cantidad: 266 },
-      { dia: "Martes", fecha: "18/08/2026", cortador: "Elvis Mallma / Pedro Gorrio", cliente: "SEDAPAL", prenda: "Casaca Cierre", genero: "Dama", cantidad: 200 },
-      { dia: "Miércoles", fecha: "19/08/2026", cortador: "Elvis Mallma / Pedro Gorrio", cliente: "ÁNCASH", prenda: "Falda", genero: "Dama", cantidad: 11 },
-      { dia: "Miércoles", fecha: "19/08/2026", cortador: "Elvis Mallma / Pedro Gorrio", cliente: "SEDAPAL", prenda: "Pantalón", genero: "Dama", cantidad: 250 },
-      { dia: "Jueves", fecha: "20/08/2026", cortador: "Elvis Mallma / Pedro Gorrio", cliente: "MOQUEGUA", prenda: "Chaleco", genero: "Dama", cantidad: 77 },
-      { dia: "Jueves", fecha: "20/08/2026", cortador: "Elvis Mallma / Pedro Gorrio", cliente: "MOQUEGUA", prenda: "Saco", genero: "Dama", cantidad: 9 },
-      { dia: "Jueves", fecha: "20/08/2026", cortador: "Doris Andrade / Roberto Serquén", cliente: "SEDAPAL", prenda: "Blusa", genero: "Dama", cantidad: 267 },
-      { dia: "Jueves", fecha: "20/08/2026", cortador: "Doris Andrade / Roberto Serquén", cliente: "MOQUEGUA", prenda: "Pantalón", genero: "Dama", cantidad: 4 },
-      { dia: "Viernes", fecha: "21/08/2026", cortador: "Elvis Mallma / Pedro Gorrio", cliente: "SEDAPAL", prenda: "Casaca Broche", genero: "Dama", cantidad: 105 },
-      { dia: "Viernes", fecha: "21/08/2026", cortador: "Doris Andrade / Roberto Serquén", cliente: "SEDAPAL", prenda: "Blusa", genero: "Dama", cantidad: 270 },
-      { dia: "Viernes", fecha: "21/08/2026", cortador: "Doris Andrade / Roberto Serquén", cliente: "PRODUCE", prenda: "Camisa", genero: "Dama", cantidad: 62 }
-    ];
+  // --- METAS DETALLADAS DESGLOSADAS CON CANTIDAD ENTREGADA EDITABLE ---
+  let metasDetalladas = [
+    // SEDAPAL
+    { entidad: "SEDAPAL", prenda: "Blusa", genero: "Dama", cortado: 918, meta: 918, entregado: 918 },
+    { entidad: "SEDAPAL", prenda: "Pantalón", genero: "Dama", cortado: 680, meta: 700, entregado: 650 },
+    { entidad: "SEDAPAL", prenda: "Casaca Cierre", genero: "Dama", cortado: 350, meta: 350, entregado: 350 },
+    { entidad: "SEDAPAL", prenda: "Casaca Broche", genero: "Dama", cortado: 295, meta: 295, entregado: 295 },
+    
+    // AYACUCHO
+    { entidad: "AYACUCHO", prenda: "Camisa", genero: "Caballero", cortado: 266, meta: 266, entregado: 266 },
+    { entidad: "AYACUCHO", prenda: "Camisa Manga Larga", genero: "Caballero", cortado: 162, meta: 180, entregado: 160 },
+    { entidad: "AYACUCHO", prenda: "Sacos", genero: "Caballero", cortado: 100, meta: 120, entregado: 90 },
+    
+    // PRODUCE
+    { entidad: "PRODUCE", prenda: "Camisa", genero: "Dama", cortado: 62, meta: 65, entregado: 62 },
+    { entidad: "PRODUCE", prenda: "Camisa", genero: "Caballero", cortado: 60, meta: 70, entregado: 60 },
+    
+    // BIBLIOTECA
+    { entidad: "BIBLIOTECA", prenda: "Camisa", genero: "Caballero", cortado: 110, meta: 110, entregado: 110 },
+    
+    // INEN
+    { entidad: "INEN", prenda: "Pantalón", genero: "Dama", cortado: 48, meta: 80, entregado: 48 },
+    { entidad: "INEN", prenda: "Pantalón", genero: "Caballero", cortado: 38, meta: 60, entregado: 38 },
+    { entidad: "INEN", prenda: "Blusa", genero: "Dama", cortado: 24, meta: 50, entregado: 24 },
+    { entidad: "INEN", prenda: "Camisa", genero: "Caballero", cortado: 2, meta: 10, entregado: 2 },
+    
+    // MOQUEGUA
+    { entidad: "MOQUEGUA", prenda: "Chaleco", genero: "Dama", cortado: 77, meta: 77, entregado: 77 },
+    { entidad: "MOQUEGUA", prenda: "Saco", genero: "Dama", cortado: 9, meta: 9, entregado: 9 },
+    { entidad: "MOQUEGUA", prenda: "Pantalón", genero: "Dama", cortado: 4, meta: 4, entregado: 4 },
+    
+    // ÁNCASH
+    { entidad: "ÁNCASH", prenda: "Falda", genero: "Dama", cortado: 11, meta: 169, entregado: 11 },
+    
+    // UNTEL
+    { entidad: "UNTEL", prenda: "Falda", genero: "Dama", cortado: 1, meta: 1, entregado: 1 }
+  ];
 
-    // --- DATOS SEMANA 2 (1,506 Pcs) ---
-    const datosSemana2 = [
-      { id: 1, fecha: "22/08/2026", fechaLabel: "Sáb 22/08", cortador: "Doris Andrade / Roberto Serquén", modalidad: "DESTAJO", cliente: "SEDAPAL", genero: "DAMA", prenda: "BLUSA", cantidad: 381, estado: "COMPLETO" },
-      { id: 2, fecha: "24/08/2026", fechaLabel: "Lun 24/08", cortador: "Elvis Mallma / Pedro Gorrio", modalidad: "DESTAJO", cliente: "SEDAPAL", genero: "DAMA", prenda: "PANTALON", cantidad: 180, estado: "COMPLETO" },
-      { id: 3, fecha: "24/08/2026", fechaLabel: "Lun 24/08", cortador: "Elvis Mallma / Pedro Gorrio", modalidad: "DESTAJO", cliente: "UNTEL", genero: "DAMA", prenda: "FALDA", cantidad: 1, estado: "COMPLETO" },
-      { id: 4, fecha: "24/08/2026", fechaLabel: "Lun 24/08", cortador: "Elvis Mallma / Pedro Gorrio", modalidad: "DESTAJO", cliente: "INEN", genero: "CABALLERO", prenda: "PANTALON", cantidad: 38, estado: "COMPLETO" },
-      { id: 5, fecha: "24/08/2026", fechaLabel: "Lun 24/08", cortador: "Doris Andrade / Roberto Serquén", modalidad: "JORNAL", cliente: "PRODUCE", genero: "CABALLERO", prenda: "CAMISA", cantidad: 60, estado: "COMPLETO" },
-      { id: 6, fecha: "24/08/2026", fechaLabel: "Lun 24/08", cortador: "Doris Andrade / Roberto Serquén", modalidad: "JORNAL", cliente: "INEN", genero: "CABALLERO", prenda: "CAMISA", cantidad: 2, estado: "COMPLETO" },
-      { id: 7, fecha: "25/08/2026", fechaLabel: "Mar 25/08", cortador: "Doris Andrade / Roberto Serquén", modalidad: "JORNAL", cliente: "BIBLIOTECA", genero: "CABALLERO", prenda: "CAMISA", cantidad: 50, estado: "COMPLETO" },
-      { id: 8, fecha: "26/08/2026", fechaLabel: "Mié 26/08", cortador: "Elvis Mallma / Pedro Gorrio", modalidad: "DESTAJO", cliente: "INEN", genero: "DAMA", prenda: "PANTALON", cantidad: 48, estado: "COMPLETO" },
-      { id: 9, fecha: "26/08/2026", fechaLabel: "Mié 26/08", cortador: "Doris Andrade / Roberto Serquén", modalidad: "JORNAL", cliente: "BIBLIOTECA", genero: "CABALLERO", prenda: "CAMISA", cantidad: 56, estado: "COMPLETO" },
-      { id: 10, fecha: "26/08/2026", fechaLabel: "Mié 26/08", cortador: "Doris Andrade / Roberto Serquén", modalidad: "JORNAL", cliente: "INEN", genero: "DAMA", prenda: "BLUSA", cantidad: 24, estado: "COMPLETO" },
-      { id: 11, fecha: "27/08/2026", fechaLabel: "Jue 27/08", cortador: "Elvis Mallma / Pedro Gorrio", modalidad: "DESTAJO", cliente: "SEDAPAL", genero: "DAMA", prenda: "PANTALON", cantidad: 250, estado: "COMPLETO" },
-      { id: 12, fecha: "27/08/2026", fechaLabel: "Jue 27/08", cortador: "Elvis Mallma / Pedro Gorrio", modalidad: "DESTAJO", cliente: "SEDAPAL", genero: "DAMA", prenda: "CASACA CON CIERRE", cantidad: 150, estado: "COMPLETO" },
-      { id: 13, fecha: "27/08/2026", fechaLabel: "Jue 27/08", cortador: "Doris Andrade / Roberto Serquén", modalidad: "DESTAJO", cliente: "BIBLIOTECA", genero: "CABALLERO", prenda: "CAMISA", cantidad: 4, estado: "COMPLETO" },
-      { id: 14, fecha: "28/08/2026", fechaLabel: "Vie 28/08", cortador: "Doris Andrade / Roberto Serquén", modalidad: "JORNAL", cliente: "AYACUCHO", genero: "CABALLERO", prenda: "CAMISA MANGA LARGA", cantidad: 162, estado: "COMPLETO" },
-      { id: 15, fecha: "28/08/2026", fechaLabel: "Vie 28/08 (JP)", cortador: "Jorge Pinchi", modalidad: "JORNAL", cliente: "AYACUCHO", genero: "CABALLERO", prenda: "SACOS", cantidad: 100, estado: "COMPLETO" }
-    ];
-
-    // --- METAS DETALLADAS DESGLOSADAS ---
-    let metasDetalladas = [
-      // SEDAPAL
-      { entidad: "SEDAPAL", prenda: "Blusa", genero: "Dama", cortado: 918, meta: 918 },
-      { entidad: "SEDAPAL", prenda: "Pantalón", genero: "Dama", cortado: 680, meta: 700 },
-      { entidad: "SEDAPAL", prenda: "Casaca Cierre", genero: "Dama", cortado: 350, meta: 350 },
-      { entidad: "SEDAPAL", prenda: "Casaca Broche", genero: "Dama", cortado: 295, meta: 295 },
-      
-      // AYACUCHO
-      { entidad: "AYACUCHO", prenda: "Camisa", genero: "Caballero", cortado: 266, meta: 266 },
-      { entidad: "AYACUCHO", prenda: "Camisa Manga Larga", genero: "Caballero", cortado: 162, meta: 180 },
-      { entidad: "AYACUCHO", prenda: "Sacos", genero: "Caballero", cortado: 100, meta: 120 },
-      
-      // PRODUCE
-      { entidad: "PRODUCE", prenda: "Camisa", genero: "Dama", cortado: 62, meta: 65 },
-      { entidad: "PRODUCE", prenda: "Camisa", genero: "Caballero", cortado: 60, meta: 70 },
-      
-      // BIBLIOTECA
-      { entidad: "BIBLIOTECA", prenda: "Camisa", genero: "Caballero", cortado: 110, meta: 110 },
-      
-      // INEN
-      { entidad: "INEN", prenda: "Pantalón", genero: "Dama", cortado: 48, meta: 80 },
-      { entidad: "INEN", prenda: "Pantalón", genero: "Caballero", cortado: 38, meta: 60 },
-      { entidad: "INEN", prenda: "Blusa", genero: "Dama", cortado: 24, meta: 50 },
-      { entidad: "INEN", prenda: "Camisa", genero: "Caballero", cortado: 2, meta: 10 },
-      
-      // MOQUEGUA
-      { entidad: "MOQUEGUA", prenda: "Chaleco", genero: "Dama", cortado: 77, meta: 77 },
-      { entidad: "MOQUEGUA", prenda: "Saco", genero: "Dama", cortado: 9, meta: 9 },
-      { entidad: "MOQUEGUA", prenda: "Pantalón", genero: "Dama", cortado: 4, meta: 4 },
-      
-      // ÁNCASH
-      { entidad: "ÁNCASH", prenda: "Falda", genero: "Dama", cortado: 11, meta: 169 },
-      
-      // UNTEL
-      { entidad: "UNTEL", prenda: "Falda", genero: "Dama", cortado: 1, meta: 1 }
-    ];
-
-    // Variables de Gráficos
-    let chartCompSem, chartClientCons;
+  // Variables de Gráficos
+  let chartCompSem, chartClientCons;
 
     window.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
-      renderTablaSemana1();
-      renderTablaSemana2();
-      renderTablaMetas();
-      initCharts();
+  // RENDERIZAR TABLA CON CANTIDAD ENTREGADA EDITABLE Y RECALCULO AUTOMÁTICO
+  function renderTablaMetas() {
+    const tbody = document.getElementById('tabla-metas-body');
+    const filtro = document.getElementById('filtro-entidad').value;
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    let sumMeta = 0;
+    let sumCortado = 0;
+    let sumEntregado = 0;
+    let sumFalta = 0;
+
+    metasDetalladas.forEach((item, index) => {
+      if (filtro !== "TODAS" && item.entidad !== filtro) return;
+
+      const faltaEntregar = Math.max(0, item.cortado - item.entregado);
+      const avance = item.cortado > 0 ? ((item.entregado / item.cortado) * 100) : 0;
+      const avanceFormatted = Math.min(avance, 100).toFixed(1);
+
+      sumMeta += item.meta;
+      sumCortado += item.cortado;
+      sumEntregado += item.entregado;
+      sumFalta += faltaEntregar;
+
+      const tr = document.createElement('tr');
+      tr.className = "hover:bg-slate-800/40 transition border-b border-slate-800/40";
+      
+      tr.innerHTML = `
+        <td class="py-3 px-3 font-extrabold text-blue-400">${item.entidad}</td>
+        <td class="py-3 px-3 font-semibold text-slate-100">${item.prenda}</td>
+        <td class="py-3 px-3 text-center">
+          <span class="px-2.5 py-0.5 text-[10px] rounded-full font-bold ${item.genero === 'Dama' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/30' : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30'}">
+            ${item.genero}
+          </span>
+        </td>
+        <td class="py-3 px-3 text-center">
+          <input type="number" min="0" value="${item.meta}" onchange="actualizarMetaDetalle(${index}, this.value)"
+            class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-center font-bold text-indigo-300 focus:outline-none focus:border-indigo-500 text-xs">
+        </td>
+        <td class="py-3 px-3 text-center">
+          <input type="number" min="0" value="${item.cortado}" onchange="actualizarCortadoDetalle(${index}, this.value)"
+            class="w-20 bg-slate-900 border border-emerald-600/60 rounded-lg px-2 py-1 text-center font-bold text-emerald-300 focus:outline-none focus:border-emerald-400 text-xs">
+        </td>
+        <td class="py-3 px-3 text-center">
+          <input type="number" min="0" value="${item.entregado}" onchange="actualizarEntregadoDetalle(${index}, this.value)"
+            class="w-20 bg-slate-900 border border-blue-600/60 rounded-lg px-2 py-1 text-center font-bold text-blue-300 focus:outline-none focus:border-blue-400 text-xs">
+        </td>
+        <td class="py-3 px-3 text-right font-bold ${faltaEntregar === 0 ? 'text-slate-500' : 'text-amber-400'}">${faltaEntregar.toLocaleString()} pcs</td>
+        <td class="py-3 px-3 text-center">
+          <div class="flex items-center justify-center gap-2">
+            <span class="font-bold text-xs ${avance >= 100 ? 'text-emerald-400' : 'text-amber-300'}">${avanceFormatted}%</span>
+            <div class="w-12 bg-slate-800 h-1.5 rounded-full overflow-hidden hidden sm:block">
+              <div class="h-full ${avance >= 100 ? 'bg-emerald-400' : 'bg-amber-400'}" style="width: ${Math.min(avance, 100)}%"></div>
+            </div>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
     });
 
-    function switchTab(tabName) {
-      const tabs = ['consolidado', 'sem2', 'sem1', 'metas'];
-      tabs.forEach(t => {
-        const btn = document.getElementById(`tab-${t}`);
-        const sec = document.getElementById(`sec-${t}`);
-        
-        if (t === tabName) {
-          sec.classList.remove('hidden');
-          if (t === 'metas') {
-            btn.className = 'px-3.5 py-2 rounded-lg text-amber-300 bg-amber-500/20 font-bold transition-all flex items-center gap-2 border border-amber-500/40 shadow';
-          } else {
-            btn.className = 'px-3.5 py-2 rounded-lg bg-blue-600 text-white font-bold transition-all flex items-center gap-2 shadow';
-          }
-        } else {
-          sec.classList.add('hidden');
-          if (t === 'metas') {
-            btn.className = 'px-3.5 py-2 rounded-lg text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 transition-all flex items-center gap-2 border border-amber-500/30';
-          } else {
-            btn.className = 'px-3.5 py-2 rounded-lg text-slate-400 hover:text-slate-200 transition-all flex items-center gap-2';
-          }
-        }
-      });
-      lucide.createIcons();
-    }
+    // Actualizar Totales del Footer de la Tabla
+    document.getElementById('foot-meta-total').innerText = `${sumMeta.toLocaleString()} pcs`;
+    document.getElementById('foot-cortado-total').innerText = `${sumCortado.toLocaleString()} pcs`;
+    document.getElementById('foot-entregado-total').innerText = `${sumEntregado.toLocaleString()} pcs`;
+    document.getElementById('foot-falta-total').innerText = `${sumFalta.toLocaleString()} pcs`;
+    const pctGlobalFooter = sumCortado > 0 ? ((sumEntregado / sumCortado) * 100).toFixed(1) : "0.0";
+    document.getElementById('foot-avance-total').innerText = `${pctGlobalFooter}%`;
+
+    // Actualizar Resumen Global Superior
+    let totalMetaGlobal = 0;
+    let totalCortadoGlobal = 0;
+    let totalEntregadoGlobal = 0;
+
+    metasDetalladas.forEach(m => {
+      totalMetaGlobal += m.meta;
+      totalCortadoGlobal += m.cortado;
+      totalEntregadoGlobal += m.entregado;
+    });
+
+    const totalFaltaGlobal = Math.max(0, totalCortadoGlobal - totalEntregadoGlobal);
+    const pctGlobalHeader = totalCortadoGlobal > 0 ? ((totalEntregadoGlobal / totalCortadoGlobal) * 100).toFixed(1) : "0.0";
+
+    document.getElementById('meta-total-global').innerText = `${totalMetaGlobal.toLocaleString()} pcs`;
+    document.getElementById('meta-total-cortado').innerText = `${totalCortadoGlobal.toLocaleString()} pcs`;
+    document.getElementById('meta-total-entregado').innerText = `${totalEntregadoGlobal.toLocaleString()} pcs`;
+    document.getElementById('meta-total-falta').innerText = `${totalFaltaGlobal.toLocaleString()} pcs`;
+    document.getElementById('meta-porcentaje-global').innerText = `${pctGlobalHeader}%`;
+  }
+
+  function filtrarTablaMetas() {
+    renderTablaMetas();
+  }
+
+  function actualizarMetaDetalle(index, valor) {
+    const val = parseInt(valor);
+    metasDetalladas[index].meta = isNaN(val) ? 0 : val;
+    renderTablaMetas();
+  }
+
+  function actualizarCortadoDetalle(index, valor) {
+    const val = parseInt(valor);
+    metasDetalladas[index].cortado = isNaN(val) ? 0 : val;
+    renderTablaMetas();
+  }
+
+  function actualizarEntregadoDetalle(index, valor) {
+    const val = parseInt(valor);
+    metasDetalladas[index].entregado = isNaN(val) ? 0 : val;
+    renderTablaMetas();
+  }
 
     function renderTablaSemana1() {
       const tbody = document.getElementById('tabla-sem1-body');
