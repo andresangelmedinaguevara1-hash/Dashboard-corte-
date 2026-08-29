@@ -300,8 +300,8 @@
           </div>
           <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
           <div>
-            <span class="text-slate-400 block text-[10px]">% AVANCE CORTE:</span>
-            <span id="meta-porcentaje-corte-global" class="font-bold text-emerald-300 text-sm">91.0%</span>
+            <span class="text-slate-400 block text-[10px]">% AVANCE (ENTREGA / META):</span>
+            <span id="meta-porcentaje-corte-global" class="font-bold text-blue-300 text-sm">88.1%</span>
           </div>
         </div>
       </div>
@@ -336,8 +336,7 @@
               <th class="py-3.5 px-3 text-center">CANT. ENTREGADA ✏️</th>
               <th class="py-3.5 px-3 text-center">FALTA CORTAR (Meta - Cortado)</th>
               <th class="py-3.5 px-3 text-center">PEND. ENTREGA (Cortado - Entregado)</th>
-              <th class="py-3.5 px-3 text-center">% AVANCE CORTE</th>
-              <th class="py-3.5 px-3 text-center">% AVANCE ENTREGA</th>
+              <th class="py-3.5 px-3 text-center">% AVANCE (Entregado / Meta)</th>
             </tr>
           </thead>
           <tbody id="tabla-metas-body" class="divide-y divide-slate-800/60 font-medium">
@@ -351,7 +350,6 @@
               <td id="foot-entregado-total" class="py-3.5 px-3 text-center text-blue-400 font-bold">3,115 pcs</td>
               <td id="foot-falta-cortar-total" class="py-3.5 px-3 text-center text-amber-400 font-bold">317 pcs</td>
               <td id="foot-falta-entrega-total" class="py-3.5 px-3 text-center text-orange-400 font-bold">102 pcs</td>
-              <td id="foot-avance-corte-total" class="py-3.5 px-3 text-center text-emerald-300 font-bold">91.0%</td>
               <td id="foot-avance-entrega-total" class="py-3.5 px-3 text-center text-blue-300 font-bold">88.1%</td>
             </tr>
           </tfoot>
@@ -469,18 +467,14 @@
       metasDetalladas.forEach((item, index) => {
         if (filtro !== "TODAS" && item.entidad !== filtro) return;
 
-        // Fórmulas corregidas:
+        // Fórmulas:
         // 1. Falta Cortar = Meta Requerida - Cantidad Cortada
         const faltaCortar = Math.max(0, item.meta - item.cortado);
         
         // 2. Pendiente por Entregar = Cantidad Cortada - Cantidad Entregada
         const faltaEntrega = Math.max(0, item.cortado - item.entregado);
 
-        // 3. Porcentaje de Avance de Corte = (Cantidad Cortada / Meta Requerida) * 100
-        const pctAvanceCorte = item.meta > 0 ? ((item.cortado / item.meta) * 100) : 0;
-        const pctAvanceCorteFormatted = Math.min(pctAvanceCorte, 100).toFixed(1);
-
-        // 4. Porcentaje de Avance de Entrega = (Cantidad Entregada / Meta Requerida) * 100
+        // 3. ÚNICO PORCENTAJE: Porcentaje de Avance = (Cantidad Entregada / Meta Requerida) * 100
         const pctAvanceEntrega = item.meta > 0 ? ((item.entregado / item.meta) * 100) : 0;
         const pctAvanceEntregaFormatted = Math.min(pctAvanceEntrega, 100).toFixed(1);
 
@@ -517,14 +511,6 @@
           <td class="py-3 px-3 text-center font-bold ${faltaEntrega === 0 ? 'text-slate-500' : 'text-orange-400'}">${faltaEntrega.toLocaleString()} pcs</td>
           <td class="py-3 px-3 text-center">
             <div class="flex items-center justify-center gap-1.5">
-              <span class="font-bold text-xs ${pctAvanceCorte >= 100 ? 'text-emerald-400' : 'text-amber-300'}">${pctAvanceCorteFormatted}%</span>
-              <div class="w-10 bg-slate-800 h-1.5 rounded-full overflow-hidden hidden sm:block">
-                <div class="h-full ${pctAvanceCorte >= 100 ? 'bg-emerald-400' : 'bg-amber-400'}" style="width: ${Math.min(pctAvanceCorte, 100)}%"></div>
-              </div>
-            </div>
-          </td>
-          <td class="py-3 px-3 text-center">
-            <div class="flex items-center justify-center gap-1.5">
               <span class="font-bold text-xs ${pctAvanceEntrega >= 100 ? 'text-blue-400' : 'text-orange-300'}">${pctAvanceEntregaFormatted}%</span>
               <div class="w-10 bg-slate-800 h-1.5 rounded-full overflow-hidden hidden sm:block">
                 <div class="h-full ${pctAvanceEntrega >= 100 ? 'bg-blue-400' : 'bg-orange-400'}" style="width: ${Math.min(pctAvanceEntrega, 100)}%"></div>
@@ -541,7 +527,6 @@
       const footEntregado = document.getElementById('foot-entregado-total');
       const footFaltaCortar = document.getElementById('foot-falta-cortar-total');
       const footFaltaEntrega = document.getElementById('foot-falta-entrega-total');
-      const footAvanceCorte = document.getElementById('foot-avance-corte-total');
       const footAvanceEntrega = document.getElementById('foot-avance-entrega-total');
 
       if (footMeta) footMeta.innerText = `${sumMeta.toLocaleString()} pcs`;
@@ -550,10 +535,8 @@
       if (footFaltaCortar) footFaltaCortar.innerText = `${sumFaltaCortar.toLocaleString()} pcs`;
       if (footFaltaEntrega) footFaltaEntrega.innerText = `${sumFaltaEntrega.toLocaleString()} pcs`;
       
-      const pctCorteFooter = sumMeta > 0 ? ((sumCortado / sumMeta) * 100).toFixed(1) : "0.0";
       const pctEntregaFooter = sumMeta > 0 ? ((sumEntregado / sumMeta) * 100).toFixed(1) : "0.0";
 
-      if (footAvanceCorte) footAvanceCorte.innerText = `${pctCorteFooter}%`;
       if (footAvanceEntrega) footAvanceEntrega.innerText = `${pctEntregaFooter}%`;
 
       // Resumen Global Superior
@@ -569,7 +552,7 @@
 
       const totalFaltaCortarGlobal = Math.max(0, totalMetaGlobal - totalCortadoGlobal);
       const totalFaltaEntregaGlobal = Math.max(0, totalCortadoGlobal - totalEntregadoGlobal);
-      const pctGlobalCorteHeader = totalMetaGlobal > 0 ? ((totalCortadoGlobal / totalMetaGlobal) * 100).toFixed(1) : "0.0";
+      const pctGlobalEntregaHeader = totalMetaGlobal > 0 ? ((totalEntregadoGlobal / totalMetaGlobal) * 100).toFixed(1) : "0.0";
 
       const metaGlob = document.getElementById('meta-total-global');
       const cortGlob = document.getElementById('meta-total-cortado');
@@ -583,7 +566,7 @@
       if (entGlob) entGlob.innerText = `${totalEntregadoGlobal.toLocaleString()} pcs`;
       if (faltaCortarGlob) faltaCortarGlob.innerText = `${totalFaltaCortarGlobal.toLocaleString()} pcs`;
       if (faltaEntregaGlob) faltaEntregaGlob.innerText = `${totalFaltaEntregaGlobal.toLocaleString()} pcs`;
-      if (pctCorteGlob) pctCorteGlob.innerText = `${pctGlobalCorteHeader}%`;
+      if (pctCorteGlob) pctCorteGlob.innerText = `${pctGlobalEntregaHeader}%`;
     };
 
     window.filtrarTablaMetas = function() {
