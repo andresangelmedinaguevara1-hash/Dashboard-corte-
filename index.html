@@ -429,7 +429,6 @@
     // Variables de Gráficos
     let chartCompSem, chartClientCons;
 
-    // --- INICIALIZACIÓN ---
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
       renderTablaSemana1();
@@ -438,7 +437,6 @@
       initCharts();
     });
 
-    // --- PESTAÑAS ---
     function switchTab(tabName) {
       const tabs = ['consolidado', 'sem2', 'sem1', 'metas'];
       tabs.forEach(t => {
@@ -464,7 +462,6 @@
       lucide.createIcons();
     }
 
-    // RENDERIZAR TABLA SEMANA 1
     function renderTablaSemana1() {
       const tbody = document.getElementById('tabla-sem1-body');
       tbody.innerHTML = '';
@@ -484,7 +481,6 @@
       });
     }
 
-    // RENDERIZAR TABLA SEMANA 2
     function renderTablaSemana2() {
       const tbody = document.getElementById('tabla-sem2-body');
       tbody.innerHTML = '';
@@ -505,125 +501,6 @@
       });
     }
 
-    // RENDERIZAR CARDS DE METAS
-    function renderCardsMetas() {
-      const container = document.getElementById('cards-metas-clientes');
-      container.innerHTML = '';
-
-      let totalMeta = 0;
-      let totalCortado = 0;
-
-      metasClientes.forEach((m, idx) => {
-        const cortadoQuincena = m.sem1 + m.sem2;
-        totalMeta += m.meta;
-        totalCortado += cortadoQuincena;
-
-        const porcentaje = m.meta > 0 ? Math.min(Math.round((cortadoQuincena / m.meta) * 100), 100) : 0;
-        const faltante = Math.max(0, m.meta - cortadoQuincena);
-
-        const div = document.createElement('div');
-        div.className = "bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3";
-        div.innerHTML = `
-          <div class="flex justify-between items-start">
-            <div>
-              <h4 class="font-black text-white text-base">${m.cliente}</h4>
-              <p class="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
-                Meta Requerida:
-                <input type="number" value="${m.meta}" onchange="actualizarMeta(${idx}, this.value)"
-                  class="w-20 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-xs text-indigo-300 font-bold focus:outline-none focus:border-indigo-500">
-                <span class="text-[10px] text-slate-500">pcs</span>
-              </p>
-            </div>
-            <span class="px-2.5 py-1 rounded-lg text-xs font-bold ${porcentaje >= 100 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'}">
-              ${porcentaje}%
-            </span>
-          </div>
-
-          <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden">
-            <div class="bg-gradient-to-r from-blue-500 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: ${porcentaje}%"></div>
-          </div>
-
-          <div class="grid grid-cols-3 gap-2 pt-1 text-xs">
-            <div class="bg-slate-900 p-2 rounded border border-slate-800 text-center">
-              <span class="text-slate-500 block text-[9px]">Semana 1</span>
-              <span class="font-bold text-slate-300">${m.sem1} pcs</span>
-            </div>
-            <div class="bg-slate-900 p-2 rounded border border-slate-800 text-center">
-              <span class="text-slate-500 block text-[9px]">Semana 2</span>
-              <span class="font-bold text-slate-300">${m.sem2} pcs</span>
-            </div>
-            <div class="bg-slate-900 p-2 rounded border border-slate-800 text-center">
-              <span class="text-slate-500 block text-[9px]">Faltante</span>
-              <span class="font-bold ${faltante === 0 ? 'text-emerald-400' : 'text-amber-400'}">${faltante} pcs</span>
-            </div>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-
-      document.getElementById('meta-total-global').innerText = `${totalMeta.toLocaleString()} pcs`;
-      document.getElementById('meta-total-cortado').innerText = `${totalCortado.toLocaleString()} pcs`;
-      const pctGlobal = totalMeta > 0 ? ((totalCortado / totalMeta) * 100).toFixed(1) : 0;
-      document.getElementById('meta-porcentaje-global').innerText = `${pctGlobal}%`;
-    }
-
-    function actualizarMeta(index, val) {
-      metasClientes[index].meta = parseInt(val) || 0;
-      renderCardsMetas();
-    }
-
-    // INICIALIZACIÓN DE GRÁFICOS CON CHART.JS
-    function initCharts() {
-      // Comparison Sem 1 vs Sem 2
-      const ctx1 = document.getElementById('chartComparacionSemanas').getContext('2d');
-      chartCompSem = new Chart(ctx1, {
-        type: 'bar',
-        data: {
-          labels: ['Semana 1 (17/08 - 21/08)', 'Semana 2 (22/08 - 28/08)'],
-          datasets: [{
-            label: 'Piezas Cortadas',
-            data: [1711, 1506],
-            backgroundColor: ['#6366f1', '#10b981'],
-            borderRadius: 8,
-            barThickness: 60
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
-            x: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { weight: 'bold' } } }
-          }
-        }
-      });
-
-      // Pie Chart Consolidado
-      const ctx2 = document.getElementById('chartClientesConsolidado').getContext('2d');
-      chartClientCons = new Chart(ctx2, {
-        type: 'doughnut',
-        data: {
-          labels: ['SEDAPAL', 'AYACUCHO', 'PRODUCE', 'BIBLIOTECA', 'INEN', 'ÁNCASH', 'MOQUEGUA', 'UNTEL'],
-          datasets: [{
-            data: [2063, 528, 122, 110, 112, 11, 90, 1],
-            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#eab308', '#64748b'],
-            borderWidth: 0
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'right', labels: { color: '#cbd5e1', font: { size: 11 } } }
-          }
-        }
-      });
-    }
-  </script>
-</body>
-</html>
-    // RENDERIZAR TABLA DE METAS Y FALTANTES DESGLOSADA
     function renderTablaMetas() {
       const tbody = document.getElementById('tabla-metas-body');
       const filtro = document.getElementById('filtro-entidad').value;
@@ -674,7 +551,7 @@
 
       // Actualizar Totales del Footer de la Tabla
       document.getElementById('foot-meta-total').innerText = `${sumMeta.toLocaleString()} pcs`;
-      document.getElementById('foot-cortado-total').innerText = `${sumCortado.toLocaleString()} pcs`;
+      document.getElementById('foot-cortado-total').innerText = `${sumCortado.toLocaleString()} pxs`;
       document.getElementById('foot-falta-total').innerText = `${sumFalta.toLocaleString()} pcs`;
       const pctGlobalFooter = sumMeta > 0 ? ((sumCortado / sumMeta) * 100).toFixed(1) : "0.0";
       document.getElementById('foot-avance-total').innerText = `${pctGlobalFooter}%`;
@@ -705,9 +582,7 @@
       renderTablaMetas();
     }
 
-    // INICIALIZACIÓN DE GRÁFICOS CON CHART.JS
     function initCharts() {
-      // Comparison Sem 1 vs Sem 2
       const ctx1 = document.getElementById('chartComparacionSemanas').getContext('2d');
       chartCompSem = new Chart(ctx1, {
         type: 'bar',
@@ -732,7 +607,6 @@
         }
       });
 
-      // Pie Chart Consolidado (Valores exactos desglosados)
       const ctx2 = document.getElementById('chartClientesConsolidado').getContext('2d');
       chartClientCons = new Chart(ctx2, {
         type: 'doughnut',
